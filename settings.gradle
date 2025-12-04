@@ -1,0 +1,9 @@
+rootProject.name = 'ssamatle'
+
+include 'domain'
+include 'application'
+include 'bootstrap'
+include 'adapter:in:http'
+include 'adapter:out:rdb'
+include 'adapter:out:in-memory'
+include 'adapter:out:nosql'
