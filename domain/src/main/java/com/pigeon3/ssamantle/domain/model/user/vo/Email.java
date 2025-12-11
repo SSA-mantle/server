@@ -1,6 +1,7 @@
 package com.pigeon3.ssamantle.domain.model.user.vo;
 
-import com.pigeon3.ssamantle.domain.model.user.exception.InvalidEmailException;
+import com.pigeon3.ssamantle.domain.model.user.exception.UserDomainException;
+import com.pigeon3.ssamantle.domain.model.user.exception.UserDomainExceptionType;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -30,15 +31,15 @@ public class Email {
 
     private static void validate(String value) {
         if (value == null || value.isBlank()) {
-            throw new InvalidEmailException("이메일은 필수입니다.");
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_EMAIL, "이메일은 필수입니다.");
         }
 
         if (value.length() > 255) {
-            throw new InvalidEmailException("이메일은 255자를 초과할 수 없습니다: " + value.length() + "자");
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_EMAIL, "이메일은 255자를 초과할 수 없습니다: " + value.length() + "자");
         }
 
         if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new InvalidEmailException("올바른 이메일 형식이 아닙니다: " + value);
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_EMAIL, "올바른 이메일 형식이 아닙니다: " + value);
         }
     }
 
