@@ -1,6 +1,7 @@
 package com.pigeon3.ssamantle.domain.model.user.vo;
 
-import com.pigeon3.ssamantle.domain.model.user.exception.InvalidNicknameException;
+import com.pigeon3.ssamantle.domain.model.user.exception.UserDomainException;
+import com.pigeon3.ssamantle.domain.model.user.exception.UserDomainExceptionType;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -31,18 +32,18 @@ public class Nickname {
 
     private static void validate(String value) {
         if (value == null || value.isBlank()) {
-            throw new InvalidNicknameException("닉네임은 필수입니다.");
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_NICKNAME, "닉네임은 필수입니다.");
         }
 
         if (value.length() < MIN_LENGTH || value.length() > MAX_LENGTH) {
-            throw new InvalidNicknameException(
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_NICKNAME,
                     String.format("닉네임은 %d자 이상 %d자 이하여야 합니다. 현재: %d자",
                             MIN_LENGTH, MAX_LENGTH, value.length())
             );
         }
 
         if (!NICKNAME_PATTERN.matcher(value).matches()) {
-            throw new InvalidNicknameException(
+            throw UserDomainException.of(UserDomainExceptionType.INVALID_NICKNAME,
                     "닉네임은 알파벳 소문자와 숫자만 사용할 수 있습니다: " + value
             );
         }

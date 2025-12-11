@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: ssamantle-server
+
+  profiles:
+    include: rdb
+
+logging:
+  level:
+    com.pigeon3.ssamantle: DEBUG
