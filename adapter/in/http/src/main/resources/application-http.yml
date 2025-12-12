@@ -1,0 +1,4 @@
+jwt:
+  secret: your-256-bit-secret-key-change-this-in-production-please-make-it-long-enough
+  access-token-validity-in-seconds: 1800
+  refresh-token-validity-in-seconds: 604800

@@ -15,8 +15,8 @@ import lombok.Getter;
  */
 @Getter
 public class Nickname {
-    private static final int MIN_LENGTH = 4;
-    private static final int MAX_LENGTH = 10;
+    private static final int MIN_LENGTH = 3;
+    private static final int MAX_LENGTH = 20;
     private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[a-z0-9]+$");
 
     private final String value;

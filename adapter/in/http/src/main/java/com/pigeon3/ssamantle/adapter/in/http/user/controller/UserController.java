@@ -24,9 +24,9 @@ public class UserController {
 
     /**
      * 회원가입
-     * POST /api/v1/users/sign-up
+     * POST /api/v1/users
      */
-    @PostMapping("/sign-up")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<SignUpResponseDto> signUp(@Valid @RequestBody SignUpRequest request) {
         // 1. 비밀번호 암호화 (HTTP 계층에서 처리)
