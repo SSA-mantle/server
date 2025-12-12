@@ -33,4 +33,9 @@ public interface UserMapper {
      * 이메일로 사용자 조회
      */
     UserEntity findByEmail(String email);
+
+    /**
+     * 사용자 정보 업데이트
+     */
+    void update(UserEntity entity);
 }

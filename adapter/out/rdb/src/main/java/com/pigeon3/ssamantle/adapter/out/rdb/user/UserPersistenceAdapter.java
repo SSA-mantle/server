@@ -5,7 +5,9 @@ import com.pigeon3.ssamantle.adapter.out.rdb.user.mapper.UserMapper;
 import com.pigeon3.ssamantle.application.user.port.out.CheckEmailDuplicationPort;
 import com.pigeon3.ssamantle.application.user.port.out.CheckNicknameDuplicationPort;
 import com.pigeon3.ssamantle.application.user.port.out.LoadUserByEmailPort;
+import com.pigeon3.ssamantle.application.user.port.out.LoadUserByIdPort;
 import com.pigeon3.ssamantle.application.user.port.out.SaveUserPort;
+import com.pigeon3.ssamantle.application.user.port.out.UpdateUserPort;
 import com.pigeon3.ssamantle.domain.model.user.User;
 import com.pigeon3.ssamantle.domain.model.user.vo.Email;
 import com.pigeon3.ssamantle.domain.model.user.vo.Nickname;
@@ -20,9 +22,11 @@ import java.util.Optional;
 @Component
 public class UserPersistenceAdapter implements
         SaveUserPort,
+        UpdateUserPort,
+        LoadUserByIdPort,
+        LoadUserByEmailPort,
         CheckEmailDuplicationPort,
-        CheckNicknameDuplicationPort,
-        LoadUserByEmailPort {
+        CheckNicknameDuplicationPort {
 
     private final UserMapper userMapper;
 
@@ -72,5 +76,40 @@ public class UserPersistenceAdapter implements
         UserEntity entity = userMapper.findByEmail(email.getValue());
         return Optional.ofNullable(entity)
                 .map(UserEntity::toDomain);
+    }
+
+    @Override
+    public Optional<User> loadById(Long userId) {
+        UserEntity entity = userMapper.findById(userId);
+        return Optional.ofNullable(entity)
+                .map(UserEntity::toDomain);
+    }
+
+    @Override
+    public User update(User user) {
+        // 1. 도메인 모델 → 영속성 엔티티 변환
+        UserEntity entity = UserEntity.builder()
+                .id(user.getId())
+                .email(user.getEmail().getValue())
+                .password(user.getPassword().getValue())
+                .role(user.getRole().name())
+                .nickname(user.getNickname().getValue())
+                .todaySolve(user.isTodaySolve())
+                .longestCont(user.getLongestCont())
+                .nowCont(user.getNowCont())
+                .isDelete(user.isDelete())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .deletedAt(user.getDeletedAt())
+                .build();
+
+        // 2. DB 업데이트
+        userMapper.update(entity);
+
+        // 3. 업데이트된 엔티티 조회
+        UserEntity updatedEntity = userMapper.findById(entity.getId());
+
+        // 4. 영속성 엔티티 → 도메인 모델 변환
+        return updatedEntity.toDomain();
     }
 }

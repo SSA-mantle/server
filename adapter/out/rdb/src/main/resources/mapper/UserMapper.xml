@@ -106,4 +106,20 @@
         WHERE email = #{email}
     </select>
 
+    <!-- 사용자 정보 업데이트 -->
+    <update id="update" parameterType="com.pigeon3.ssamantle.adapter.out.rdb.user.entity.UserEntity">
+        UPDATE users
+        SET
+            password = #{password},
+            nickname = #{nickname},
+            role = #{role},
+            today_solve = #{todaySolve},
+            longest_cont = #{longestCont},
+            now_cont = #{nowCont},
+            is_delete = #{isDelete},
+            updated_at = #{updatedAt},
+            deleted_at = #{deletedAt}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

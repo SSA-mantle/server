@@ -263,7 +263,8 @@ class GamePersistenceAdapter implements SaveGamePort {
 **반드시 정의된 예외를 사용합니다.**
 
 - `IllegalArgumentException`, `RuntimeException` 등 기본 예외를 직접 던지지 않습니다 ❌
-- 각 계층별로 명확한 의미를 가진 커스텀 예외를 정의하여 사용합니다 ✅
+- 각 계층별로 명확한 의미를 가진 커스텀 예외를 enum 타입으로 정의하여 사용합니다 ✅
+- 새로운 예외가 필요한 경우, 해당 계층의 ExceptionType enum에 추가합니다 ✅
 
 **예외 계층 구조**:
 ```
@@ -271,11 +272,30 @@ domain/
 └── com.pigeon3.ssamatle.domain.model.{bounded-context}/
     └── exception/
         ├── {Domain}Exception.java          # 도메인 예외 기본 클래스
-        ├── InvalidEmailException.java      # 구체적 도메인 예외
-        ├── InvalidPasswordException.java
-        └── InvalidNicknameException.java
+        └── {Domain}ExceptionType.java          # 예외 타입 enum 정의
 ```
 
+
+    INVALID_EMAIL("USER_001", "올바른 이메일 형식이 아닙니다."),
+    USER_NOT_FOUND("USER_100", "사용자를 찾을 수 없습니다.");
+
+    private final String errorCode;
+    private final String message;
+}
+
+// 2. Exception 클래스에서 enum 타입 사용
+public class UserDomainException extends RuntimeException {
+    private final UserDomainExceptionType exceptionType;
+
+    public static UserDomainException of(UserDomainExceptionType type) {
+        return new UserDomainException(type, type.getMessage());
+    }
+
+    public static UserDomainException of(UserDomainExceptionType type, String customMessage) {
+        return new UserDomainException(type, customMessage);
+    }
+}
+```
 **예외 명명 규칙**:
 - 도메인 예외: `{Domain}Exception`, `Invalid{Field}Exception`
 - 애플리케이션 예외: `{UseCase}Exception`
@@ -283,15 +303,16 @@ domain/
 
 **예시**:
 ```java
-// ❌ 나쁜 예
+// ❌ 나쁜 예 - 기본 예외 직접 사용
 public static Email of(String value) {
     if (!isValid(value)) {
-        throw new IllegalArgumentException("잘못된 이메일입니다.");
-    }
-    return new Email(value);
+
+        throw UserDomainException.of(UserDomainExceptionType.INVALID_EMAIL, "잘못된 이메일입니다: " + value);
+
+
 }
 
-// ✅ 좋은 예
+// ✅ 좋은 예 - 정의된 enum 타입 예외 사용
 public static Email of(String value) {
     if (!isValid(value)) {
         throw new InvalidEmailException("잘못된 이메일입니다: " + value);
@@ -305,3 +326,9 @@ public static Email of(String value) {
 - Framework: Spring Boot
 - Build: Gradle (멀티모듈)
 - Persistence: MyBatis (RDB), Redis (NoSQL)
+
+**새로운 예외 추가 방법**:
+1. 해당 계층의 `{Domain}ExceptionType.java` enum 파일을 엽니다
+2. 적절한 카테고리(값 객체 유효성 검증, 도메인 규칙 위반 등)에 새 예외 타입을 추가합니다
+3. 에러 코드와 기본 메시지를 함께 정의합니다
+4. `{Domain}Exception.of()` 메서드로 예외를 던집니다

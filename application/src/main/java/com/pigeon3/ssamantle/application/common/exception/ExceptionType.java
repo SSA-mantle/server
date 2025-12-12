@@ -25,6 +25,7 @@ public enum ExceptionType {
     DUPLICATE_EMAIL("U005", 409, "이미 존재하는 이메일입니다."),
     DUPLICATE_NICKNAME("U006", 409, "이미 존재하는 닉네임입니다."),
     USER_DELETED("U007", 400, "탈퇴한 사용자입니다."),
+    NO_UPDATE_FIELD("U008", 400, "수정할 항목이 없습니다."),
 
     // 인증 예외
     INVALID_CREDENTIALS("A001", 401, "이메일 또는 비밀번호가 일치하지 않습니다."),
