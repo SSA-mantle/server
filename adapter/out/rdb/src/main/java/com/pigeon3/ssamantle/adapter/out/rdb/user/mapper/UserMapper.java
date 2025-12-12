@@ -28,4 +28,9 @@ public interface UserMapper {
      * ID로 사용자 조회 (저장 후 조회용)
      */
     UserEntity findById(Long id);
+
+    /**
+     * 이메일로 사용자 조회
+     */
+    UserEntity findByEmail(String email);
 }
