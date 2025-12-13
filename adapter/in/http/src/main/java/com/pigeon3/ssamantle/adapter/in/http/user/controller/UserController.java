@@ -1,10 +1,14 @@
 package com.pigeon3.ssamantle.adapter.in.http.user.controller;
 
 import com.pigeon3.ssamantle.adapter.in.http.common.response.ApiResponse;
+import com.pigeon3.ssamantle.adapter.in.http.user.dto.GetMyInfoResponseDto;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.SignUpRequest;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.SignUpResponseDto;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.UpdateUserRequest;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.UpdateUserResponseDto;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoCommand;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoResponse;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoUseCase;
 import com.pigeon3.ssamantle.application.user.port.in.SignUpResponse;
 import com.pigeon3.ssamantle.application.user.port.in.SignUpUseCase;
 import com.pigeon3.ssamantle.application.user.port.in.UpdateUserResponse;
@@ -26,6 +30,7 @@ public class UserController {
 
     private final SignUpUseCase signUpUseCase;
     private final UpdateUserUseCase updateUserUseCase;
+    private final GetMyInfoUseCase getMyInfoUseCase;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -67,5 +72,17 @@ public class UserController {
         // 3. 응답 반환
         UpdateUserResponseDto responseDto = UpdateUserResponseDto.from(response);
         return ApiResponse.success(responseDto);
+    }
+
+    /**
+     * 내 정보 조회
+     * GET /api/v1/users/me
+     */
+    @GetMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<GetMyInfoResponseDto> getMyInfo(
+            @AuthenticationPrincipal Long userId) {
+        GetMyInfoResponse response = getMyInfoUseCase.execute(new GetMyInfoCommand(userId));
+        return ApiResponse.success(GetMyInfoResponseDto.from(response));
     }
 }
