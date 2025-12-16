@@ -1,5 +1,8 @@
 package com.pigeon3.ssamantle.domain.model.record;
 
+import com.pigeon3.ssamantle.domain.model.record.exception.RecordDomainException;
+import com.pigeon3.ssamantle.domain.model.record.exception.RecordDomainExceptionType;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -16,15 +19,17 @@ public class Record {
     private final Long problemId;
     private int failCount;
     private LocalDateTime solvedAt;
+    private LocalDateTime giveUpAt;
     private final LocalDateTime createdAt;
 
     private Record(Long id, Long userId, Long problemId, int failCount,
-                   LocalDateTime solvedAt, LocalDateTime createdAt) {
+                   LocalDateTime solvedAt, LocalDateTime giveUpAt, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.problemId = problemId;
         this.failCount = failCount;
         this.solvedAt = solvedAt;
+        this.giveUpAt = giveUpAt;
         this.createdAt = createdAt;
     }
 
@@ -38,6 +43,7 @@ public class Record {
                 problemId,
                 0,
                 null,
+                null,
                 LocalDateTime.now()
         );
     }
@@ -46,8 +52,8 @@ public class Record {
      * 기존 기록 재구성 (영속성 계층에서 사용)
      */
     public static Record reconstruct(Long id, Long userId, Long problemId, int failCount,
-                                      LocalDateTime solvedAt, LocalDateTime createdAt) {
-        return new Record(id, userId, problemId, failCount, solvedAt, createdAt);
+                                      LocalDateTime solvedAt, LocalDateTime giveUpAt, LocalDateTime createdAt) {
+        return new Record(id, userId, problemId, failCount, solvedAt, giveUpAt, createdAt);
     }
 
     /**
@@ -55,6 +61,16 @@ public class Record {
      */
     public void incrementFailCount() {
         this.failCount++;
+    }
+
+    /**
+     * 실패 횟수 업데이트 (프론트엔드에서 관리하는 경우)
+     */
+    public void updateFailCount(int failCount) {
+        if (failCount < 0) {
+            throw new IllegalArgumentException("실패 횟수는 0 이상이어야 합니다: " + failCount);
+        }
+        this.failCount = failCount;
     }
 
     /**
@@ -66,6 +82,33 @@ public class Record {
 
 	public boolean isSolved() {
         return solvedAt != null;
+    }
+
+    /**
+     * 문제 포기
+     */
+    public void giveUp() {
+        if (this.solvedAt != null) {
+            throw RecordDomainException.of(RecordDomainExceptionType.ALREADY_SOLVED);
+        }
+        if (this.giveUpAt != null) {
+            throw RecordDomainException.of(RecordDomainExceptionType.ALREADY_GAVE_UP);
+        }
+        this.giveUpAt = LocalDateTime.now();
+    }
+
+    /**
+     * 포기 여부 확인
+     */
+    public boolean isGaveUp() {
+        return giveUpAt != null;
+    }
+
+    /**
+     * 진행 가능한 상태인지 확인 (풀지도 않고 포기하지도 않음)
+     */
+    public boolean isInProgress() {
+        return solvedAt == null && giveUpAt == null;
     }
 
     @Override

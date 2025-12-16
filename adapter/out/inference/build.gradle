@@ -2,5 +2,5 @@ dependencies {
     compileOnly project(":domain")
     compileOnly project(":application")
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }

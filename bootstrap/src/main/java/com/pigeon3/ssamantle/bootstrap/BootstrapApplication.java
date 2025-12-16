@@ -9,6 +9,8 @@ import org.springframework.context.annotation.ComponentScan;
 	"com.pigeon3.ssamantle.bootstrap",
 	"com.pigeon3.ssamantle.adapter.in.http",
 	"com.pigeon3.ssamantle.adapter.out.rdb",
+	"com.pigeon3.ssamantle.adapter.out.inmemory",
+	"com.pigeon3.ssamantle.adapter.out.inference",
 	"com.pigeon3.ssamantle.application"
 })
 public class BootstrapApplication {

@@ -36,3 +36,7 @@ bin/
 .vscode/
 
 **/*.sql
+
+### API Documentation ###
+api-docs/
+api-docs.zip

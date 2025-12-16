@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pigeon3.ssamantle.adapter.out.rdb.problem.mapper.ProblemMapper">
+
+    <resultMap id="problemResultMap" type="com.pigeon3.ssamantle.adapter.out.rdb.problem.entity.ProblemEntity">
+        <id property="id" column="id"/>
+        <result property="answer" column="answer"/>
+        <result property="date" column="date"/>
+    </resultMap>
+
+    <select id="findByDate" parameterType="java.time.LocalDate" resultMap="problemResultMap">
+        SELECT
+            id,
+            answer,
+            date
+        FROM problems
+        WHERE date = #{date}
+    </select>
+
+</mapper>
