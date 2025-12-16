@@ -30,7 +30,15 @@ public enum ExceptionType {
     // 인증 예외
     INVALID_CREDENTIALS("A001", 401, "이메일 또는 비밀번호가 일치하지 않습니다."),
     INVALID_TOKEN("A002", 401, "유효하지 않은 토큰입니다."),
-    EXPIRED_TOKEN("A003", 401, "만료된 토큰입니다.");
+    EXPIRED_TOKEN("A003", 401, "만료된 토큰입니다."),
+
+    // 게임 예외
+    PROBLEM_NOT_FOUND("G001", 404, "오늘의 문제를 찾을 수 없습니다."),
+    RECORD_NOT_FOUND("G002", 404, "게임 기록을 찾을 수 없습니다."),
+    ALREADY_SOLVED("G003", 409, "이미 해결된 문제입니다."),
+    ALREADY_GAVE_UP("G004", 409, "이미 포기한 문제입니다."),
+    NO_GAME_IN_PROGRESS("G005", 404, "진행 중인 게임이 없습니다."),
+    SIMILARITY_CALCULATION_FAILED("G006", 500, "유사도 계산에 실패했습니다.");
 
     private final String errorCode;
     private final int httpStatusCode;

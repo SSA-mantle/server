@@ -3,7 +3,7 @@ spring:
     name: ssamantle-server
 
   profiles:
-    include: rdb, http
+    include: rdb, http, inmemory, inference
 
 logging:
   level:

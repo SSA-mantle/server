@@ -1,0 +1,5 @@
+inference:
+  api:
+    base-url: http://localhost:8000  # 추론 서버 기본 URL (환경에 맞게 수정 필요)
+    endpoint: /api/similarity
+    timeout: 5000  # 타임아웃 (밀리초)

@@ -21,6 +21,7 @@ public class RecordEntity {
     private Long problemId;
     private Integer failCount;
     private LocalDateTime solvedAt;
+    private LocalDateTime giveUpAt;
     private LocalDateTime createdAt;
 
     /**
@@ -33,6 +34,7 @@ public class RecordEntity {
                 this.problemId,
                 this.failCount,
                 this.solvedAt,
+                this.giveUpAt,
                 this.createdAt
         );
     }
