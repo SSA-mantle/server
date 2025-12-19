@@ -41,8 +41,8 @@ public class InferenceSimilarityAdapter implements CalculateSimilarityPort {
                 throw new RuntimeException("추론 서버 응답이 null입니다.");
             }
 
-            log.info("Received similarity: word={}, similarity={}, rank={}",
-                response.word(), response.similarity(), response.rank());
+            log.info("Received similarity: date={}, answer={}, word={}, similarity={}",
+                response.date(), response.answer(), response.word(), response.similarity());
 
             return response.toDomain();
 

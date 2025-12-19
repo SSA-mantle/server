@@ -29,8 +29,7 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     private final UpdateRecordPort updateRecordPort;
     private final LoadUserByIdPort loadUserByIdPort;
     private final UpdateUserPort updateUserPort;
-    private final LoadSimilarityFromRedisPort loadSimilarityFromRedisPort;
-    private final SaveSimilarityToRedisPort saveSimilarityToRedisPort;
+    private final LoadWordFromTop1000Port loadWordFromTop1000Port;
     private final CalculateSimilarityPort calculateSimilarityPort;
     private final SaveLeaderboardPort saveLeaderboardPort;
 
@@ -120,10 +119,10 @@ public class SubmitGuessService implements SubmitGuessUseCase {
      * 오답 처리
      */
     private SubmitGuessResponse handleWrongAnswer(Record record, Problem problem, SubmitGuessCommand command, LocalDate today) {
-        // 1. 유사도 조회 (Redis -> 추론 서버)
-        WordSimilarity wordSimilarity = loadSimilarityFromRedisPort.loadSimilarity(today, command.guessWord())
+        // 1. 유사도 조회 (파이썬 서버가 저장한 Top 1000 -> 추론 서버)
+        WordSimilarity wordSimilarity = loadWordFromTop1000Port.loadWord(today, command.guessWord())
             .orElseGet(() -> {
-                // Redis에 없으면 추론 서버에 요청하고 그대로 반환
+                // Top 1000에 없으면 추론 서버에 요청
                 return calculateSimilarityPort.calculate(
                     problem.getAnswer(),
                     command.guessWord()
