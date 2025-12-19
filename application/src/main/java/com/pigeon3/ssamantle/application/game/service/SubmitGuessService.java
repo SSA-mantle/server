@@ -4,9 +4,11 @@ import com.pigeon3.ssamantle.application.common.exception.ApplicationException;
 import com.pigeon3.ssamantle.application.common.exception.ExceptionType;
 import com.pigeon3.ssamantle.application.game.port.in.*;
 import com.pigeon3.ssamantle.application.game.port.out.*;
+import com.pigeon3.ssamantle.application.leaderboard.port.out.SaveLeaderboardPort;
 import com.pigeon3.ssamantle.application.user.port.out.LoadUserByIdPort;
 import com.pigeon3.ssamantle.application.user.port.out.UpdateUserPort;
 import com.pigeon3.ssamantle.domain.model.game.vo.WordSimilarity;
+import com.pigeon3.ssamantle.domain.model.leaderboard.vo.LeaderboardScore;
 import com.pigeon3.ssamantle.domain.model.problem.Problem;
 import com.pigeon3.ssamantle.domain.model.record.Record;
 import com.pigeon3.ssamantle.domain.model.record.exception.RecordDomainException;
@@ -30,6 +32,7 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     private final LoadSimilarityFromRedisPort loadSimilarityFromRedisPort;
     private final SaveSimilarityToRedisPort saveSimilarityToRedisPort;
     private final CalculateSimilarityPort calculateSimilarityPort;
+    private final SaveLeaderboardPort saveLeaderboardPort;
 
     @Transactional
     @Override
@@ -86,11 +89,30 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         user.solveProblem();
         updateUserPort.update(user);
 
-        // 3. 응답 반환
+        // 3. 리더보드 업데이트
+        updateLeaderboard(problem.getDate(), updatedRecord);
+
+        // 4. 응답 반환
         return SubmitGuessResponse.correct(
             command.guessWord(),
             problem.getAnswer(),
             updatedRecord.getFailCount()
+        );
+    }
+
+    /**
+     * 리더보드 업데이트
+     */
+    private void updateLeaderboard(LocalDate problemDate, Record record) {
+        LeaderboardScore score = LeaderboardScore.of(
+            record.getFailCount(),
+            record.getSolvedAt()
+        );
+
+        saveLeaderboardPort.saveOrUpdate(
+            problemDate,
+            record.getUserId(),
+            score.getScore()
         );
     }
 

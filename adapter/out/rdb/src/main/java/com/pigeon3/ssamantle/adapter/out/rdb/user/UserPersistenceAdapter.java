@@ -2,6 +2,7 @@ package com.pigeon3.ssamantle.adapter.out.rdb.user;
 
 import com.pigeon3.ssamantle.adapter.out.rdb.user.entity.UserEntity;
 import com.pigeon3.ssamantle.adapter.out.rdb.user.mapper.UserMapper;
+import com.pigeon3.ssamantle.application.leaderboard.port.out.LoadUsersByIdsPort;
 import com.pigeon3.ssamantle.application.user.port.out.CheckEmailDuplicationPort;
 import com.pigeon3.ssamantle.application.user.port.out.CheckNicknameDuplicationPort;
 import com.pigeon3.ssamantle.application.user.port.out.LoadUserByEmailPort;
@@ -13,7 +14,10 @@ import com.pigeon3.ssamantle.domain.model.user.vo.Email;
 import com.pigeon3.ssamantle.domain.model.user.vo.Nickname;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * User 영속성 어댑터
@@ -26,7 +30,8 @@ public class UserPersistenceAdapter implements
         LoadUserByIdPort,
         LoadUserByEmailPort,
         CheckEmailDuplicationPort,
-        CheckNicknameDuplicationPort {
+        CheckNicknameDuplicationPort,
+        LoadUsersByIdsPort {
 
     private final UserMapper userMapper;
 
@@ -111,5 +116,17 @@ public class UserPersistenceAdapter implements
 
         // 4. 영속성 엔티티 → 도메인 모델 변환
         return updatedEntity.toDomain();
+    }
+
+    @Override
+    public Map<Long, User> loadByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<UserEntity> entities = userMapper.findByIds(userIds);
+        return entities.stream()
+                .map(UserEntity::toDomain)
+                .collect(Collectors.toMap(User::getId, user -> user));
     }
 }
