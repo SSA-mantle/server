@@ -122,4 +122,27 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 여러 사용자를 ID로 조회 -->
+    <select id="findByIds" resultMap="userResultMap">
+        SELECT
+            id,
+            email,
+            password,
+            role,
+            nickname,
+            today_solve,
+            longest_cont,
+            now_cont,
+            is_delete,
+            created_at,
+            updated_at,
+            deleted_at
+        FROM users
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND is_delete = false
+    </select>
+
 </mapper>

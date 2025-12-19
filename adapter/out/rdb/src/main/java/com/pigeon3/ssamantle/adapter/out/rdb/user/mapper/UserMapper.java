@@ -2,6 +2,9 @@ package com.pigeon3.ssamantle.adapter.out.rdb.user.mapper;
 
 import com.pigeon3.ssamantle.adapter.out.rdb.user.entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * User MyBatis Mapper
@@ -38,4 +41,9 @@ public interface UserMapper {
      * 사용자 정보 업데이트
      */
     void update(UserEntity entity);
+
+    /**
+     * 여러 사용자를 ID로 조회
+     */
+    List<UserEntity> findByIds(@Param("ids") List<Long> ids);
 }
