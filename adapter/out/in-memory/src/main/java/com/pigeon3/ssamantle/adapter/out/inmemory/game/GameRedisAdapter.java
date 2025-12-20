@@ -23,10 +23,10 @@ public class GameRedisAdapter implements
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // 파이썬 서버와 공유하는 키 (ssamentle 프리픽스)
-    private static final String REDIS_KEY_PREFIX = "ssamentle";
-    private static final String TOP1000_KEY_FORMAT = "%s:%s:topk";  // ssamentle:{date}:topk
-    private static final String ANSWER_KEY_FORMAT = "%s:%s:answer"; // ssamentle:{date}:answer
+    // 파이썬 서버와 공유하는 키 (ssamantle 프리픽스)
+    private static final String REDIS_KEY_PREFIX = "ssamantle";
+    private static final String TOP1000_KEY_FORMAT = "%s:%s:topk";  // ssamantle:{date}:topk
+    private static final String ANSWER_KEY_FORMAT = "%s:%s:answer"; // ssamantle:{date}:answer
 
     @Override
     public Optional<WordSimilarity> loadWord(LocalDate date, String word) {

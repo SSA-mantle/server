@@ -1,4 +1,4 @@
-rootProject.name = 'ssamatle'
+rootProject.name = 'ssamantle'
 
 include 'domain'
 include 'application'
