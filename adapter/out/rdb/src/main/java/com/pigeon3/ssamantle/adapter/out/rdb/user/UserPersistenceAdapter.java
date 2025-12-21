@@ -3,12 +3,7 @@ package com.pigeon3.ssamantle.adapter.out.rdb.user;
 import com.pigeon3.ssamantle.adapter.out.rdb.user.entity.UserEntity;
 import com.pigeon3.ssamantle.adapter.out.rdb.user.mapper.UserMapper;
 import com.pigeon3.ssamantle.application.leaderboard.port.out.LoadUsersByIdsPort;
-import com.pigeon3.ssamantle.application.user.port.out.CheckEmailDuplicationPort;
-import com.pigeon3.ssamantle.application.user.port.out.CheckNicknameDuplicationPort;
-import com.pigeon3.ssamantle.application.user.port.out.LoadUserByEmailPort;
-import com.pigeon3.ssamantle.application.user.port.out.LoadUserByIdPort;
-import com.pigeon3.ssamantle.application.user.port.out.SaveUserPort;
-import com.pigeon3.ssamantle.application.user.port.out.UpdateUserPort;
+import com.pigeon3.ssamantle.application.user.port.out.*;
 import com.pigeon3.ssamantle.domain.model.user.User;
 import com.pigeon3.ssamantle.domain.model.user.vo.Email;
 import com.pigeon3.ssamantle.domain.model.user.vo.Nickname;
@@ -31,7 +26,8 @@ public class UserPersistenceAdapter implements
         LoadUserByEmailPort,
         CheckEmailDuplicationPort,
         CheckNicknameDuplicationPort,
-        LoadUsersByIdsPort {
+        LoadUsersByIdsPort,
+        ResetTodaySolveForAllUsersPort {
 
     private final UserMapper userMapper;
 
@@ -51,6 +47,7 @@ public class UserPersistenceAdapter implements
                 .todaySolve(user.isTodaySolve())
                 .longestCont(user.getLongestCont())
                 .nowCont(user.getNowCont())
+                .bestRank(user.getBestRank())
                 .isDelete(user.isDelete())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -102,6 +99,7 @@ public class UserPersistenceAdapter implements
                 .todaySolve(user.isTodaySolve())
                 .longestCont(user.getLongestCont())
                 .nowCont(user.getNowCont())
+                .bestRank(user.getBestRank())
                 .isDelete(user.isDelete())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -128,5 +126,10 @@ public class UserPersistenceAdapter implements
         return entities.stream()
                 .map(UserEntity::toDomain)
                 .collect(Collectors.toMap(User::getId, user -> user));
+    }
+
+    @Override
+    public void resetTodaySolveForAll() {
+        userMapper.resetTodaySolveForAll();
     }
 }

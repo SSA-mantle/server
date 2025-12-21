@@ -14,6 +14,7 @@
         <result property="todaySolve" column="today_solve"/>
         <result property="longestCont" column="longest_cont"/>
         <result property="nowCont" column="now_cont"/>
+        <result property="bestRank" column="best_rank"/>
         <result property="isDelete" column="is_delete"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
@@ -31,6 +32,7 @@
             today_solve,
             longest_cont,
             now_cont,
+            best_rank,
             is_delete,
             created_at,
             updated_at
@@ -42,6 +44,7 @@
             #{todaySolve},
             #{longestCont},
             #{nowCont},
+            #{bestRank},
             #{isDelete},
             #{createdAt},
             #{updatedAt}
@@ -79,6 +82,7 @@
             today_solve,
             longest_cont,
             now_cont,
+            best_rank,
             is_delete,
             created_at,
             updated_at,
@@ -98,6 +102,7 @@
             today_solve,
             longest_cont,
             now_cont,
+            best_rank,
             is_delete,
             created_at,
             updated_at,
@@ -116,6 +121,7 @@
             today_solve = #{todaySolve},
             longest_cont = #{longestCont},
             now_cont = #{nowCont},
+            best_rank = #{bestRank},
             is_delete = #{isDelete},
             updated_at = #{updatedAt},
             deleted_at = #{deletedAt}
@@ -133,6 +139,7 @@
             today_solve,
             longest_cont,
             now_cont,
+            best_rank,
             is_delete,
             created_at,
             updated_at,
@@ -144,5 +151,15 @@
         </foreach>
         AND is_delete = false
     </select>
+
+    <!-- 일자 변경 시: 모든 사용자 todaySolve 초기화 + (미해결자는 nowCont=0) -->
+    <update id="resetTodaySolveForAll">
+        UPDATE users
+        SET
+            now_cont = CASE WHEN today_solve = false THEN 0 ELSE now_cont END,
+            today_solve = false,
+            updated_at = NOW(6)
+        WHERE is_delete = false
+    </update>
 
 </mapper>

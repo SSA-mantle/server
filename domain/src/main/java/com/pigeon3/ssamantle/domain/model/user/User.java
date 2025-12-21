@@ -24,13 +24,16 @@ public class User {
     private boolean todaySolve;
     private int longestCont;
     private int nowCont;
+
+    private Integer bestRank;
+
     private boolean isDelete;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
     private User(Long id, Email email, Password password, Role role, Nickname nickname,
-                 boolean todaySolve, int longestCont, int nowCont, boolean isDelete,
+                 boolean todaySolve, int longestCont, int nowCont, Integer bestRank, boolean isDelete,
                  LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
         this.id = id;
         this.email = email;
@@ -40,6 +43,7 @@ public class User {
         this.todaySolve = todaySolve;
         this.longestCont = longestCont;
         this.nowCont = nowCont;
+        this.bestRank = bestRank;
         this.isDelete = isDelete;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -59,6 +63,7 @@ public class User {
                 false,
                 0,
                 0,
+                null,
                 false,
                 LocalDateTime.now(),
                 null,
@@ -70,9 +75,9 @@ public class User {
      * 기존 사용자 재구성 (영속성 계층에서 사용)
      */
     public static User reconstruct(Long id, Email email, Password password, Role role, Nickname nickname,
-                                    boolean todaySolve, int longestCont, int nowCont, boolean isDelete,
+                                    boolean todaySolve, int longestCont, int nowCont, Integer bestRank, boolean isDelete,
                                     LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
-        return new User(id, email, password, role, nickname, todaySolve, longestCont, nowCont, isDelete,
+        return new User(id, email, password, role, nickname, todaySolve, longestCont, nowCont, bestRank, isDelete,
                 createdAt, updatedAt, deletedAt);
     }
 
@@ -97,6 +102,19 @@ public class User {
         }
         this.todaySolve = false;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 리더보드 기반 최고 랭킹 갱신
+     * - bestRank가 없거나(null)
+     * - 이번 rank가 더 좋으면(숫자가 더 작으면)
+     * 갱신한다.
+     */
+    public void updateBestRank(int rank) {
+        if (this.bestRank == null || rank < this.bestRank) {
+            this.bestRank = rank;
+            this.updatedAt = LocalDateTime.now();
+        }
     }
 
     /**
