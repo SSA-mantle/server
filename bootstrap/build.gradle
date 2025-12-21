@@ -7,6 +7,7 @@ dependencies {
 	runtimeOnly project(":domain")
 	runtimeOnly project(":application")
 	runtimeOnly project(":adapter:in:http")
+	runtimeOnly project(":adapter:in:scheduler")
 	runtimeOnly project(":adapter:out:rdb")
 	runtimeOnly project(":adapter:out:in-memory")
 	runtimeOnly project(":adapter:out:inference")
