@@ -145,4 +145,14 @@
         AND is_delete = false
     </select>
 
+    <!-- 일자 변경 시: 모든 사용자 todaySolve 초기화 + (미해결자는 nowCont=0) -->
+    <update id="resetTodaySolveForAll">
+        UPDATE users
+        SET
+            now_cont = CASE WHEN today_solve = false THEN 0 ELSE now_cont END,
+            today_solve = false,
+            updated_at = NOW(6)
+        WHERE is_delete = false
+    </update>
+
 </mapper>

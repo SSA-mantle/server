@@ -1,5 +1,6 @@
 package com.pigeon3.ssamantle.adapter.out.inmemory.leaderboard;
 
+import com.pigeon3.ssamantle.application.leaderboard.port.out.ClearLeaderboardPort;
 import com.pigeon3.ssamantle.application.leaderboard.port.out.LoadLeaderboardPort;
 import com.pigeon3.ssamantle.application.leaderboard.port.out.SaveLeaderboardPort;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,20 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class LeaderboardRedisAdapter implements
         LoadLeaderboardPort,
-        SaveLeaderboardPort {
+        SaveLeaderboardPort,
+        ClearLeaderboardPort {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String LEADERBOARD_KEY_PREFIX = "leaderboard:%s";
     private static final Duration CACHE_DURATION = Duration.ofDays(30); // 30일 보관
     private static final long FAIL_COUNT_MULTIPLIER = 10_000_000_000_000L; // 10^13
+
+    @Override
+    public void clear(LocalDate date){
+        String key = getLeaderboardKey(date);
+        redisTemplate.delete(key);
+    }
 
     @Override
     public List<LeaderboardRankDto> loadTopRankers(LocalDate date, int limit) {

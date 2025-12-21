@@ -46,4 +46,9 @@ public interface UserMapper {
      * 여러 사용자를 ID로 조회
      */
     List<UserEntity> findByIds(@Param("ids") List<Long> ids);
+
+    /**
+     * 일자 변경 시: 모든 사용자 todaySolve 초기화 + (미해결자는 nowCont=0)
+     */
+    void resetTodaySolveForAll();
 }
