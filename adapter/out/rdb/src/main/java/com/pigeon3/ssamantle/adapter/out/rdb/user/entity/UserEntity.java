@@ -28,6 +28,7 @@ public class UserEntity {
     private Boolean todaySolve;
     private Integer longestCont;
     private Integer nowCont;
+    private Integer bestRank;
     private Boolean isDelete;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -46,6 +47,7 @@ public class UserEntity {
                 this.todaySolve,
                 this.longestCont,
                 this.nowCont,
+                this.bestRank,
                 this.isDelete,
                 this.createdAt,
                 this.updatedAt,
