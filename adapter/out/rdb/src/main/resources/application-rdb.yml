@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/ssamantle?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
-    password: dbstmdgur123!@#
+    password: road3144
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
