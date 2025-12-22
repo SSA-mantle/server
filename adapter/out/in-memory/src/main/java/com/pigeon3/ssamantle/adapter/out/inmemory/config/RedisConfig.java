@@ -31,7 +31,7 @@ public class RedisConfig {
      * Answer 전용 RedisTemplate (Python 서버가 저장한 단순 문자열 읽기용)
      */
     @Bean
-    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<String, String> answerRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
