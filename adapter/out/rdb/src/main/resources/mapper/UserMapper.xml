@@ -156,8 +156,8 @@
     <update id="resetTodaySolveForAll">
         UPDATE users
         SET
-            now_cont = CASE WHEN today_solve = false THEN 0 ELSE now_cont END,
-            today_solve = false,
+            now_cont = IF(today_solve = 1, now_cont, 0),
+            today_solve = 0,
             updated_at = NOW(6)
         WHERE is_delete = false
     </update>
