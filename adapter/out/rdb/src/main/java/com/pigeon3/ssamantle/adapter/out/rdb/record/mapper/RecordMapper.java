@@ -31,4 +31,9 @@ public interface RecordMapper {
      * 사용자 게임 통계 조회
      */
     GameStatisticsDataDto findStatisticsByUserId(Long userId);
+
+    /**
+     * 사용자가 해결한 총 문제 수 조회
+     */
+    int countSolvedByUserId(Long userId);
 }

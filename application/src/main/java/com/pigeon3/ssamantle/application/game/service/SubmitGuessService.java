@@ -1,5 +1,7 @@
 package com.pigeon3.ssamantle.application.game.service;
 
+import com.pigeon3.ssamantle.application.achievement.port.in.CheckAndGrantAchievementsCommand;
+import com.pigeon3.ssamantle.application.achievement.port.in.CheckAndGrantAchievementsUseCase;
 import com.pigeon3.ssamantle.application.common.exception.ApplicationException;
 import com.pigeon3.ssamantle.application.common.exception.ExceptionType;
 import com.pigeon3.ssamantle.application.game.port.in.*;
@@ -7,6 +9,7 @@ import com.pigeon3.ssamantle.application.game.port.out.*;
 import com.pigeon3.ssamantle.application.leaderboard.port.out.SaveLeaderboardPort;
 import com.pigeon3.ssamantle.application.user.port.out.LoadUserByIdPort;
 import com.pigeon3.ssamantle.application.user.port.out.UpdateUserPort;
+import com.pigeon3.ssamantle.domain.model.achievement.AchievementType;
 import com.pigeon3.ssamantle.domain.model.game.vo.WordSimilarity;
 import com.pigeon3.ssamantle.domain.model.leaderboard.vo.LeaderboardScore;
 import com.pigeon3.ssamantle.domain.model.problem.Problem;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     private final CalculateSimilarityPort calculateSimilarityPort;
     private final SaveLeaderboardPort saveLeaderboardPort;
     private final LoadAnswerFromRedisPort loadAnswerFromRedisPort;
+    private final CheckAndGrantAchievementsUseCase checkAndGrantAchievementsUseCase;
 
     @Transactional
     @Override
@@ -113,11 +118,16 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         // 3. 리더보드 업데이트
         updateLeaderboard(problemDate, updatedRecord);
 
-        // 4. 응답 반환
+        // 4. 업적 체크 및 부여
+        CheckAndGrantAchievementsCommand achievementCommand = new CheckAndGrantAchievementsCommand(command.userId());
+        List<AchievementType> newAchievements = checkAndGrantAchievementsUseCase.execute(achievementCommand);
+
+        // 5. 응답 반환 (새 업적 포함)
         return SubmitGuessResponse.correct(
             command.guessWord(),
             answer,
-            updatedRecord.getFailCount()
+            updatedRecord.getFailCount(),
+            newAchievements
         );
     }
 

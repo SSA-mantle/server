@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pigeon3.ssamantle.adapter.out.rdb.achievement.mapper.UserAchievementMapper">
+
+    <resultMap id="userAchievementResultMap" type="com.pigeon3.ssamantle.adapter.out.rdb.achievement.entity.UserAchievementEntity">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="achievementType" column="achievement_type"/>
+        <result property="unlockedAt" column="unlocked_at"/>
+    </resultMap>
+
+    <!-- 업적 저장 -->
+    <insert id="insert" parameterType="com.pigeon3.ssamantle.adapter.out.rdb.achievement.entity.UserAchievementEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_achievements (user_id, achievement_type, unlocked_at)
+        VALUES (#{userId}, #{achievementType}, #{unlockedAt})
+    </insert>
+
+    <!-- 사용자 ID로 모든 업적 조회 -->
+    <select id="findByUserId" parameterType="long" resultMap="userAchievementResultMap">
+        SELECT *
+        FROM user_achievements
+        WHERE user_id = #{userId}
+        ORDER BY unlocked_at DESC
+    </select>
+
+    <!-- 사용자 ID와 업적 타입으로 존재 여부 확인 -->
+    <select id="existsByUserIdAndType" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM user_achievements
+            WHERE user_id = #{userId}
+              AND achievement_type = #{achievementType}
+        )
+    </select>
+
+</mapper>
