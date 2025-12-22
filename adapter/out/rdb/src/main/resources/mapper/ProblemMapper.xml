@@ -19,4 +19,10 @@
         WHERE date = #{date}
     </select>
 
+    <insert id="insert" parameterType="com.pigeon3.ssamantle.adapter.out.rdb.problem.entity.ProblemEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO problems (answer, date)
+        VALUES (#{answer}, #{date})
+    </insert>
+
 </mapper>

@@ -11,4 +11,9 @@ public interface ProblemMapper {
      * 날짜로 문제 조회
      */
     ProblemEntity findByDate(LocalDate date);
+
+    /**
+     * 문제 저장
+     */
+    void insert(ProblemEntity entity);
 }
