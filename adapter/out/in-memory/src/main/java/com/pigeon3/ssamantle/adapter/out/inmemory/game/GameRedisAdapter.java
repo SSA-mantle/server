@@ -1,14 +1,19 @@
 package com.pigeon3.ssamantle.adapter.out.inmemory.game;
 
 import com.pigeon3.ssamantle.application.game.port.out.LoadAnswerFromRedisPort;
+import com.pigeon3.ssamantle.application.game.port.out.LoadTop100WordsPort;
 import com.pigeon3.ssamantle.application.game.port.out.LoadWordFromTop1000Port;
 import com.pigeon3.ssamantle.domain.model.game.vo.WordSimilarity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Redis에서 파이썬 서버가 저장한 데이터를 조회하는 어댑터
@@ -19,7 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GameRedisAdapter implements
         LoadWordFromTop1000Port,
-        LoadAnswerFromRedisPort {
+        LoadAnswerFromRedisPort,
+        LoadTop100WordsPort {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -59,5 +65,33 @@ public class GameRedisAdapter implements
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public List<WordSimilarity> loadTop100Words(LocalDate date) {
+        String key = String.format(TOP1000_KEY_FORMAT, REDIS_KEY_PREFIX, date.toString());
+
+        // ZREVRANGE: 내림차순으로 상위 100개 조회 (0-based)
+        Set<ZSetOperations.TypedTuple<Object>> top100Set = redisTemplate.opsForZSet()
+            .reverseRangeWithScores(key, 0, 99);
+
+        if (top100Set == null || top100Set.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<WordSimilarity> result = new ArrayList<>();
+        int rank = 1;  // 1-based 순위
+        for (ZSetOperations.TypedTuple<Object> tuple : top100Set) {
+            String word = (String) tuple.getValue();
+            Double score = tuple.getScore();
+
+            if (word != null && score != null) {
+                // score는 0.0~1.0 범위이므로 100을 곱해서 0.0~100.0으로 변환
+                result.add(WordSimilarity.of(word, score * 100, rank));
+            }
+            rank++;
+        }
+
+        return result;
     }
 }
