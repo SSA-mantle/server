@@ -20,6 +20,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
     private final LoadTodayProblemPort loadTodayProblemPort;
     private final LoadTodayRecordPort loadTodayRecordPort;
     private final LoadTop100WordsPort loadTop100WordsPort;
+    private final LoadAnswerFromRedisPort loadAnswerFromRedisPort;
 
     @Transactional(readOnly = true)
     @Override
@@ -33,21 +34,47 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
         // 오늘인 경우에만 권한 확인 필요
         boolean isToday = command.dateType() == GetAnswerHistoryCommand.DateType.TODAY;
 
-        // 1. 문제 조회
-        Optional<Problem> problemOpt = loadTodayProblemPort.loadByDate(targetDate);
-        if (problemOpt.isEmpty()) {
-            return GetAnswerHistoryResponse.builder()
-                .date(targetDate)
-                .answer(null)
-                .top100Words(null)
-                .build();
+        // 1. Redis에서 정답 조회 (먼저 시도)
+        Optional<String> answerFromRedis = loadAnswerFromRedisPort.loadAnswer(targetDate);
+
+        String answer = null;
+        Long problemId = null;
+
+        if (answerFromRedis.isPresent()) {
+            // Redis에 정답이 있는 경우
+            answer = answerFromRedis.get();
+
+            // 권한 확인을 위해 문제 ID가 필요한 경우 DB 조회
+            if (isToday) {
+                Optional<Problem> problemOpt = loadTodayProblemPort.loadByDate(targetDate);
+                if (problemOpt.isEmpty()) {
+                    return GetAnswerHistoryResponse.builder()
+                        .date(targetDate)
+                        .answer(null)
+                        .top100Words(null)
+                        .build();
+                }
+                problemId = problemOpt.get().getId();
+            }
+        } else {
+            // Redis에 없으면 DB에서 문제 조회
+            Optional<Problem> problemOpt = loadTodayProblemPort.loadByDate(targetDate);
+            if (problemOpt.isEmpty()) {
+                return GetAnswerHistoryResponse.builder()
+                    .date(targetDate)
+                    .answer(null)
+                    .top100Words(null)
+                    .build();
+            }
+
+            Problem problem = problemOpt.get();
+            answer = problem.getAnswer();
+            problemId = problem.getId();
         }
 
-        Problem problem = problemOpt.get();
-
         // 2. 오늘 문제인 경우 권한 확인 (풀었거나 포기해야만 조회 가능)
-        if (isToday) {
-            Optional<Record> recordOpt = loadTodayRecordPort.loadByUserIdAndProblemId(command.userId(), problem.getId());
+        if (isToday && problemId != null) {
+            Optional<Record> recordOpt = loadTodayRecordPort.loadByUserIdAndProblemId(command.userId(), problemId);
 
             // 기록이 없거나 진행 중인 경우 null 반환
             if (recordOpt.isEmpty() || recordOpt.get().isInProgress()) {
@@ -59,7 +86,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
             }
         }
 
-        // 3. 정답과 유사도 상위 100개 조회
+        // 3. 유사도 상위 100개 조회
         List<WordSimilarity> top100 = loadTop100WordsPort.loadTop100Words(targetDate);
         List<GetAnswerHistoryResponse.WordSimilarityInfo> top100Info = top100.stream()
             .map(ws -> GetAnswerHistoryResponse.WordSimilarityInfo.builder()
@@ -71,7 +98,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
 
         return GetAnswerHistoryResponse.builder()
             .date(targetDate)
-            .answer(problem.getAnswer())
+            .answer(answer)
             .top100Words(top100Info)
             .build();
     }
