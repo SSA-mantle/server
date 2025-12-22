@@ -17,6 +17,7 @@ public class GameController {
     private final SubmitGuessUseCase submitGuessUseCase;
     private final GiveUpGameUseCase giveUpGameUseCase;
     private final GetAnswerHistoryUseCase getAnswerHistoryUseCase;
+    private final GetGameStatusUseCase getGameStatusUseCase;
 
     /**
      * 단어 추측 제출
@@ -79,5 +80,21 @@ public class GameController {
         GetAnswerHistoryResponse response = getAnswerHistoryUseCase.execute(command);
 
         return ApiResponse.success(GetAnswerHistoryResponseDto.from(response));
+    }
+
+    /**
+     * 게임 상태 조회
+     * GET /api/v1/games/status
+     * - 사용자의 오늘 게임 진행 상태 조회 (NOT_STARTED, IN_PROGRESS, SOLVED, GAVE_UP)
+     */
+    @GetMapping("/status")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<GetGameStatusResponseDto> getGameStatus(
+            @AuthenticationPrincipal Long userId) {
+
+        GetGameStatusQuery query = new GetGameStatusQuery(userId);
+        GetGameStatusResponse response = getGameStatusUseCase.execute(query);
+
+        return ApiResponse.success(GetGameStatusResponseDto.from(response));
     }
 }
