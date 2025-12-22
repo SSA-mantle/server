@@ -42,4 +42,21 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
+
+    /**
+     * Top1000 전용 RedisTemplate (Python 서버가 저장한 ZSet 데이터 읽기용)
+     * ZSet의 member(단어)가 String이므로 StringRedisSerializer 사용
+     */
+    @Bean
+    public RedisTemplate<String, String> top1000RedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Key, Value 모두 String Serializer 사용
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
+        return template;
+    }
 }
