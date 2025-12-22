@@ -32,16 +32,27 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     private final LoadWordFromTop1000Port loadWordFromTop1000Port;
     private final CalculateSimilarityPort calculateSimilarityPort;
     private final SaveLeaderboardPort saveLeaderboardPort;
+    private final LoadAnswerFromRedisPort loadAnswerFromRedisPort;
 
     @Transactional
     @Override
     public SubmitGuessResponse execute(SubmitGuessCommand command) {
-        // 1. 오늘의 문제 조회
         LocalDate today = LocalDate.now();
+
+        // 1. Redis에서 정답 조회 (먼저 시도)
+        String answer = loadAnswerFromRedisPort.loadAnswer(today)
+            .orElse(null);
+
+        // 2. DB에서 문제 조회 (Record 생성/조회를 위해 problemId 필요)
         Problem todayProblem = loadTodayProblemPort.loadByDate(today)
             .orElseThrow(() -> ApplicationException.of(ExceptionType.PROBLEM_NOT_FOUND));
 
-        // 2. 사용자 기록 조회 또는 생성
+        // Redis에 정답이 없으면 DB의 정답 사용
+        if (answer == null) {
+            answer = todayProblem.getAnswer();
+        }
+
+        // 3. 사용자 기록 조회 또는 생성
         Record record = loadTodayRecordPort.loadByUserIdAndProblemId(command.userId(), todayProblem.getId())
             .orElseGet(() -> {
                 // 기록이 없으면 새로 생성
@@ -49,16 +60,16 @@ public class SubmitGuessService implements SubmitGuessUseCase {
                 return saveRecordPort.save(newRecord);
             });
 
-        // 3. 기록 상태 검증 (도메인 예외를 애플리케이션 예외로 변환)
+        // 4. 기록 상태 검증 (도메인 예외를 애플리케이션 예외로 변환)
         validateRecordState(record);
 
-        // 4. 정답 여부 확인
-        if (todayProblem.isCorrectAnswer(command.guessWord())) {
-            return handleCorrectAnswer(record, todayProblem, command);
+        // 5. 정답 여부 확인
+        if (answer.equals(command.guessWord())) {
+            return handleCorrectAnswer(record, answer, todayProblem.getDate(), command);
         }
 
-        // 5. 오답 처리
-        return handleWrongAnswer(record, todayProblem, command, today);
+        // 6. 오답 처리
+        return handleWrongAnswer(record, answer, command, today);
     }
 
     /**
@@ -76,7 +87,7 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     /**
      * 정답 처리
      */
-    private SubmitGuessResponse handleCorrectAnswer(Record record, Problem problem, SubmitGuessCommand command) {
+    private SubmitGuessResponse handleCorrectAnswer(Record record, String answer, LocalDate problemDate, SubmitGuessCommand command) {
         // 1. Record 업데이트
         record.updateFailCount(command.failCount());
         record.solve();
@@ -89,12 +100,12 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         updateUserPort.update(user);
 
         // 3. 리더보드 업데이트
-        updateLeaderboard(problem.getDate(), updatedRecord);
+        updateLeaderboard(problemDate, updatedRecord);
 
         // 4. 응답 반환
         return SubmitGuessResponse.correct(
             command.guessWord(),
-            problem.getAnswer(),
+            answer,
             updatedRecord.getFailCount()
         );
     }
@@ -118,13 +129,13 @@ public class SubmitGuessService implements SubmitGuessUseCase {
     /**
      * 오답 처리
      */
-    private SubmitGuessResponse handleWrongAnswer(Record record, Problem problem, SubmitGuessCommand command, LocalDate today) {
+    private SubmitGuessResponse handleWrongAnswer(Record record, String answer, SubmitGuessCommand command, LocalDate today) {
         // 1. 유사도 조회 (파이썬 서버가 저장한 Top 1000 -> 추론 서버)
         WordSimilarity wordSimilarity = loadWordFromTop1000Port.loadWord(today, command.guessWord())
             .orElseGet(() -> {
                 // Top 1000에 없으면 추론 서버에 요청
                 return calculateSimilarityPort.calculate(
-                    problem.getAnswer(),
+                    answer,
                     command.guessWord()
                 );
             });
