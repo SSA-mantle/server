@@ -27,7 +27,7 @@ public class GameRedisAdapter implements
         LoadAnswerFromRedisPort,
         LoadTop100WordsPort {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> top1000RedisTemplate;  // Top 1000 조회용
     private final RedisTemplate<String, String> answerRedisTemplate;  // Answer 조회용
 
     // 파이썬 서버와 공유하는 키 (ssamantle 프리픽스)
@@ -40,13 +40,13 @@ public class GameRedisAdapter implements
         String key = String.format(TOP1000_KEY_FORMAT, REDIS_KEY_PREFIX, date.toString());
 
         // ZSCORE: 유사도 조회 (O(1))
-        Double score = redisTemplate.opsForZSet().score(key, word);
+        Double score = top1000RedisTemplate.opsForZSet().score(key, word);
         if (score == null) {
             return Optional.empty();  // Top 1000에 없음
         }
 
         // ZREVRANK: 랭킹 조회 (내림차순, 0-based) (O(log N))
-        Long rank = redisTemplate.opsForZSet().reverseRank(key, word);
+        Long rank = top1000RedisTemplate.opsForZSet().reverseRank(key, word);
         if (rank == null) {
             return Optional.empty();
         }
@@ -69,7 +69,7 @@ public class GameRedisAdapter implements
         String key = String.format(TOP1000_KEY_FORMAT, REDIS_KEY_PREFIX, date.toString());
 
         // ZREVRANGE: 내림차순으로 상위 100개 조회 (0-based)
-        Set<ZSetOperations.TypedTuple<Object>> top100Set = redisTemplate.opsForZSet()
+        Set<ZSetOperations.TypedTuple<String>> top100Set = top1000RedisTemplate.opsForZSet()
             .reverseRangeWithScores(key, 0, 99);
 
         if (top100Set == null || top100Set.isEmpty()) {
@@ -78,8 +78,8 @@ public class GameRedisAdapter implements
 
         List<WordSimilarity> result = new ArrayList<>();
         int rank = 1;  // 1-based 순위
-        for (ZSetOperations.TypedTuple<Object> tuple : top100Set) {
-            String word = (String) tuple.getValue();
+        for (ZSetOperations.TypedTuple<String> tuple : top100Set) {
+            String word = tuple.getValue();
             Double score = tuple.getScore();
 
             if (word != null && score != null) {
