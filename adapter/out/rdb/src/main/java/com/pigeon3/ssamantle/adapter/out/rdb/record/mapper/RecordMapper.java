@@ -1,5 +1,6 @@
 package com.pigeon3.ssamantle.adapter.out.rdb.record.mapper;
 
+import com.pigeon3.ssamantle.adapter.out.rdb.record.dto.GameStatisticsDataDto;
 import com.pigeon3.ssamantle.adapter.out.rdb.record.entity.RecordEntity;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -25,4 +26,9 @@ public interface RecordMapper {
      * 사용자 ID와 문제 ID로 기록 조회
      */
     RecordEntity findByUserIdAndProblemId(Long userId, Long problemId);
+
+    /**
+     * 사용자 게임 통계 조회
+     */
+    GameStatisticsDataDto findStatisticsByUserId(Long userId);
 }
