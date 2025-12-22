@@ -28,7 +28,7 @@ public class GameRedisAdapter implements
         LoadTop100WordsPort {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, String> stringRedisTemplate;  // Answer 조회용
+    private final RedisTemplate<String, String> answerRedisTemplate;  // Answer 조회용
 
     // 파이썬 서버와 공유하는 키 (ssamantle 프리픽스)
     private static final String REDIS_KEY_PREFIX = "ssamantle";
@@ -59,7 +59,7 @@ public class GameRedisAdapter implements
     @Override
     public Optional<String> loadAnswer(LocalDate date) {
         String key = String.format(ANSWER_KEY_FORMAT, REDIS_KEY_PREFIX, date.toString());
-        String answer = stringRedisTemplate.opsForValue().get(key);
+        String answer = answerRedisTemplate.opsForValue().get(key);
 
         return Optional.ofNullable(answer);
     }
