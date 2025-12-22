@@ -84,4 +84,12 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 사용자가 해결한 총 문제 수 조회 -->
+    <select id="countSolvedByUserId" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM records
+        WHERE user_id = #{userId}
+          AND solved_at IS NOT NULL
+    </select>
+
 </mapper>

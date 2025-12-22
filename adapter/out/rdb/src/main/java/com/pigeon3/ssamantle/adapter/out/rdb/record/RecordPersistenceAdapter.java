@@ -3,6 +3,7 @@ package com.pigeon3.ssamantle.adapter.out.rdb.record;
 import com.pigeon3.ssamantle.adapter.out.rdb.record.dto.GameStatisticsDataDto;
 import com.pigeon3.ssamantle.adapter.out.rdb.record.entity.RecordEntity;
 import com.pigeon3.ssamantle.adapter.out.rdb.record.mapper.RecordMapper;
+import com.pigeon3.ssamantle.application.achievement.port.out.LoadTotalSolvedCountPort;
 import com.pigeon3.ssamantle.application.game.port.out.*;
 import com.pigeon3.ssamantle.application.user.port.out.GameStatisticsData;
 import com.pigeon3.ssamantle.application.user.port.out.LoadGameStatisticsPort;
@@ -18,7 +19,8 @@ public class RecordPersistenceAdapter implements
         SaveRecordPort,
         UpdateRecordPort,
         LoadTodayRecordPort,
-        LoadGameStatisticsPort {
+        LoadGameStatisticsPort,
+        LoadTotalSolvedCountPort {
 
     private final RecordMapper recordMapper;
 
@@ -68,5 +70,10 @@ public class RecordPersistenceAdapter implements
     public GameStatisticsData loadStatisticsByUserId(Long userId) {
         GameStatisticsDataDto dto = recordMapper.findStatisticsByUserId(userId);
         return dto != null ? dto.toDomain() : new GameStatisticsData(0L, 0L, 0.0);
+    }
+
+    @Override
+    public int loadTotalSolvedCount(Long userId) {
+        return recordMapper.countSolvedByUserId(userId);
     }
 }
