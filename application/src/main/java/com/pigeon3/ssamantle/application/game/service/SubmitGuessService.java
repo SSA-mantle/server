@@ -24,6 +24,7 @@ import java.time.LocalDate;
 public class SubmitGuessService implements SubmitGuessUseCase {
 
     private final LoadTodayProblemPort loadTodayProblemPort;
+    private final SaveProblemPort saveProblemPort;
     private final LoadTodayRecordPort loadTodayRecordPort;
     private final SaveRecordPort saveRecordPort;
     private final UpdateRecordPort updateRecordPort;
@@ -43,13 +44,23 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         String answer = loadAnswerFromRedisPort.loadAnswer(today)
             .orElse(null);
 
-        // 2. DB에서 문제 조회 (Record 생성/조회를 위해 problemId 필요)
-        Problem todayProblem = loadTodayProblemPort.loadByDate(today)
-            .orElseThrow(() -> ApplicationException.of(ExceptionType.PROBLEM_NOT_FOUND));
-
-        // Redis에 정답이 없으면 DB의 정답 사용
-        if (answer == null) {
-            answer = todayProblem.getAnswer();
+        // 2. Problem 조회 또는 생성
+        Problem todayProblem;
+        final String finalAnswer;
+        if (answer != null) {
+            // Redis에 정답이 있으면: DB 조회 후 없으면 생성
+            finalAnswer = answer;
+            todayProblem = loadTodayProblemPort.loadByDate(today)
+                .orElseGet(() -> {
+                    // Problem이 없으면 Redis 정답으로 새로 생성
+                    Problem newProblem = Problem.create(finalAnswer, today);
+                    return saveProblemPort.save(newProblem);
+                });
+        } else {
+            // Redis에 정답이 없으면: DB에서 조회 (없으면 예외)
+            todayProblem = loadTodayProblemPort.loadByDate(today)
+                .orElseThrow(() -> ApplicationException.of(ExceptionType.PROBLEM_NOT_FOUND));
+            finalAnswer = todayProblem.getAnswer();
         }
 
         // 3. 사용자 기록 조회 또는 생성
@@ -64,12 +75,12 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         validateRecordState(record);
 
         // 5. 정답 여부 확인
-        if (answer.equals(command.guessWord())) {
-            return handleCorrectAnswer(record, answer, todayProblem.getDate(), command);
+        if (finalAnswer.equals(command.guessWord())) {
+            return handleCorrectAnswer(record, finalAnswer, todayProblem.getDate(), command);
         }
 
         // 6. 오답 처리
-        return handleWrongAnswer(record, answer, command, today);
+        return handleWrongAnswer(record, finalAnswer, command, today);
     }
 
     /**
