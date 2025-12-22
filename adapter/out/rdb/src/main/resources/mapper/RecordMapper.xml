@@ -74,4 +74,14 @@
           AND problem_id = #{problemId}
     </select>
 
+    <!-- 사용자 게임 통계 조회 -->
+    <select id="findStatisticsByUserId" parameterType="long" resultType="com.pigeon3.ssamantle.adapter.out.rdb.record.dto.GameStatisticsDataDto">
+        SELECT
+            COUNT(*) as totalGamesPlayed,
+            SUM(CASE WHEN solved_at IS NOT NULL THEN 1 ELSE 0 END) as successfulGames,
+            ROUND(AVG(CASE WHEN solved_at IS NOT NULL THEN fail_count ELSE NULL END), 2) as averageAttempts
+        FROM records
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

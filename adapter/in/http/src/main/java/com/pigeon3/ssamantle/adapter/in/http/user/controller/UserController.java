@@ -1,11 +1,15 @@
 package com.pigeon3.ssamantle.adapter.in.http.user.controller;
 
 import com.pigeon3.ssamantle.adapter.in.http.common.response.ApiResponse;
+import com.pigeon3.ssamantle.adapter.in.http.user.dto.GetMyGameStatisticsResponseDto;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.GetMyInfoResponseDto;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.SignUpRequest;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.SignUpResponseDto;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.UpdateUserRequest;
 import com.pigeon3.ssamantle.adapter.in.http.user.dto.UpdateUserResponseDto;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyGameStatisticsCommand;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyGameStatisticsResponse;
+import com.pigeon3.ssamantle.application.user.port.in.GetMyGameStatisticsUseCase;
 import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoCommand;
 import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoResponse;
 import com.pigeon3.ssamantle.application.user.port.in.GetMyInfoUseCase;
@@ -31,6 +35,7 @@ public class UserController {
     private final SignUpUseCase signUpUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final GetMyInfoUseCase getMyInfoUseCase;
+    private final GetMyGameStatisticsUseCase getMyGameStatisticsUseCase;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -84,5 +89,19 @@ public class UserController {
             @AuthenticationPrincipal Long userId) {
         GetMyInfoResponse response = getMyInfoUseCase.execute(new GetMyInfoCommand(userId));
         return ApiResponse.success(GetMyInfoResponseDto.from(response));
+    }
+
+    /**
+     * 내 게임 통계 조회
+     * GET /api/v1/users/me/statistics
+     */
+    @GetMapping("/me/statistics")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<GetMyGameStatisticsResponseDto> getMyGameStatistics(
+            @AuthenticationPrincipal Long userId) {
+        GetMyGameStatisticsResponse response = getMyGameStatisticsUseCase.execute(
+            new GetMyGameStatisticsCommand(userId)
+        );
+        return ApiResponse.success(GetMyGameStatisticsResponseDto.from(response));
     }
 }
