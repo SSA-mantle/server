@@ -24,7 +24,16 @@ public class WordSimilarity {
         validateWord(word);
         validateSimilarity(similarity);
         validateRank(rank);
-        return new WordSimilarity(word, similarity, rank);
+        // 소수점 두 자리 아래는 버림
+        double truncatedSimilarity = truncateToTwoDecimals(similarity);
+        return new WordSimilarity(word, truncatedSimilarity, rank);
+    }
+
+    /**
+     * 소수점 두 자리 아래 버림
+     */
+    private static double truncateToTwoDecimals(double value) {
+        return Math.floor(value * 100) / 100;
     }
 
     private static void validateWord(String word) {

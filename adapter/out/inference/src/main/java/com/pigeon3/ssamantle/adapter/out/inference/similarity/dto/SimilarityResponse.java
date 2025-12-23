@@ -20,11 +20,12 @@ public record SimilarityResponse(
      * 도메인 모델로 변환
      * similarity가 null이면 예외 발생 (없는 단어)
      * rank는 파이썬 서버가 제공하지 않으므로 -1(순위 없음)로 설정
+     * similarity는 0.0~1.0 범위의 값이므로 100을 곱해서 0.0~100.0으로 변환
      */
     public WordSimilarity toDomain() {
         if (similarity == null) {
             throw GameDomainException.of(GameDomainExceptionType.WORD_NOT_FOUND);
         }
-        return WordSimilarity.of(word, similarity, -1);  // rank는 항상 -1
+        return WordSimilarity.of(word, similarity * 100, -1);  // rank는 항상 -1
     }
 }
