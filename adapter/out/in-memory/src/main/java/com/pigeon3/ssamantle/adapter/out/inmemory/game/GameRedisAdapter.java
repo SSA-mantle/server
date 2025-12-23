@@ -34,6 +34,7 @@ public class GameRedisAdapter implements
     private static final String REDIS_KEY_PREFIX = "ssamantle";
     private static final String TOP1000_KEY_FORMAT = "%s:%s:topk";  // ssamantle:{date}:topk
     private static final String ANSWER_KEY_FORMAT = "%s:%s:answer"; // ssamantle:{date}:answer
+    private static final String ANSWER_DESC_KEY_FORMAT = "%s:%s:answer_desc"; // ssamantle:{date}:answer_desc
 
     @Override
     public Optional<WordSimilarity> loadWord(LocalDate date, String word) {
@@ -62,6 +63,14 @@ public class GameRedisAdapter implements
         String answer = answerRedisTemplate.opsForValue().get(key);
 
         return Optional.ofNullable(answer);
+    }
+
+    @Override
+    public Optional<String> loadAnswerDescription(LocalDate date) {
+        String key = String.format(ANSWER_DESC_KEY_FORMAT, REDIS_KEY_PREFIX, date.toString());
+        String description = answerRedisTemplate.opsForValue().get(key);
+
+        return Optional.ofNullable(description);
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.util.List;
 public record GetAnswerHistoryResponseDto(
     LocalDate date,
     String answer,
+    String answerDescription,
     List<WordSimilarityInfoDto> top100Words
 ) {
     @Builder
@@ -34,6 +35,7 @@ public record GetAnswerHistoryResponseDto(
         return GetAnswerHistoryResponseDto.builder()
             .date(response.date())
             .answer(response.answer())
+            .answerDescription(response.answerDescription())
             .top100Words(top100)
             .build();
     }
