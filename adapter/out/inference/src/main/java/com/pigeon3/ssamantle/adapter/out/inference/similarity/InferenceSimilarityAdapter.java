@@ -3,6 +3,8 @@ package com.pigeon3.ssamantle.adapter.out.inference.similarity;
 import com.pigeon3.ssamantle.adapter.out.inference.similarity.dto.SimilarityRequest;
 import com.pigeon3.ssamantle.adapter.out.inference.similarity.dto.SimilarityResponse;
 import com.pigeon3.ssamantle.application.game.port.out.CalculateSimilarityPort;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainException;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainExceptionType;
 import com.pigeon3.ssamantle.domain.model.game.vo.WordSimilarity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,7 @@ public class InferenceSimilarityAdapter implements CalculateSimilarityPort {
                 .block();
 
             if (response == null) {
-                throw new RuntimeException("추론 서버 응답이 null입니다.");
+                throw GameDomainException.of(GameDomainExceptionType.INFERENCE_SERVER_NO_RESPONSE);
             }
 
             log.info("Received similarity: date={}, answer={}, word={}, similarity={}",
@@ -46,9 +48,16 @@ public class InferenceSimilarityAdapter implements CalculateSimilarityPort {
 
             return response.toDomain();
 
+        } catch (GameDomainException e) {
+            // 도메인 예외는 그대로 전파 (없는 단어 등)
+            throw e;
         } catch (Exception e) {
             log.error("Failed to calculate similarity for word: {}", guessWord, e);
-            throw new RuntimeException("추론 서버 호출 실패: " + e.getMessage(), e);
+            throw GameDomainException.of(
+                GameDomainExceptionType.INFERENCE_SERVER_CALL_FAILED,
+                "추론 서버 호출 실패: " + e.getMessage(),
+                e
+            );
         }
     }
 }
