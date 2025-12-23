@@ -34,15 +34,18 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
         // 오늘인 경우에만 권한 확인 필요
         boolean isToday = command.dateType() == GetAnswerHistoryCommand.DateType.TODAY;
 
-        // 1. Redis에서 정답 조회 (먼저 시도)
+        // 1. Redis에서 정답 및 정답 설명 조회 (먼저 시도)
         Optional<String> answerFromRedis = loadAnswerFromRedisPort.loadAnswer(targetDate);
+        Optional<String> answerDescriptionFromRedis = loadAnswerFromRedisPort.loadAnswerDescription(targetDate);
 
         String answer = null;
+        String answerDescription = null;
         Long problemId = null;
 
         if (answerFromRedis.isPresent()) {
             // Redis에 정답이 있는 경우
             answer = answerFromRedis.get();
+            answerDescription = answerDescriptionFromRedis.orElse(null);
 
             // 권한 확인을 위해 문제 ID가 필요한 경우 DB 조회
             if (isToday) {
@@ -51,6 +54,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
                     return GetAnswerHistoryResponse.builder()
                         .date(targetDate)
                         .answer(null)
+                        .answerDescription(null)
                         .top100Words(null)
                         .build();
                 }
@@ -63,12 +67,14 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
                 return GetAnswerHistoryResponse.builder()
                     .date(targetDate)
                     .answer(null)
+                    .answerDescription(null)
                     .top100Words(null)
                     .build();
             }
 
             Problem problem = problemOpt.get();
             answer = problem.getAnswer();
+            answerDescription = answerDescriptionFromRedis.orElse(null);
             problemId = problem.getId();
         }
 
@@ -81,6 +87,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
                 return GetAnswerHistoryResponse.builder()
                     .date(targetDate)
                     .answer(null)
+                    .answerDescription(null)
                     .top100Words(null)
                     .build();
             }
@@ -99,6 +106,7 @@ public class GetAnswerHistoryService implements GetAnswerHistoryUseCase {
         return GetAnswerHistoryResponse.builder()
             .date(targetDate)
             .answer(answer)
+            .answerDescription(answerDescription)
             .top100Words(top100Info)
             .build();
     }

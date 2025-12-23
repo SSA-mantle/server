@@ -8,6 +8,7 @@ import java.util.List;
 public record GetAnswerHistoryResponse(
     LocalDate date,
     String answer,                          // 정답 단어 (오늘 문제를 아직 안 풀었을 때는 null)
+    String answerDescription,               // 정답 단어 설명 (null일 수도 있음)
     List<WordSimilarityInfo> top100Words    // 유사도 상위 100개 단어 (null일 수도 있음)
 ) {
     @Builder
