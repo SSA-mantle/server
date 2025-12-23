@@ -21,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RunDailyMaintenanceBatchService implements RunDailyMaintenanceBatchUseCase {
 
-    private static final int TOP_RANKERS_LIMIT = 100;
+    private static final int TOP_RANKERS_LIMIT = 50;
     private static final Duration MAINTENANCE_TTL = Duration.ofMinutes(60);
 
     private final MaintenanceModePort maintenanceModePort;

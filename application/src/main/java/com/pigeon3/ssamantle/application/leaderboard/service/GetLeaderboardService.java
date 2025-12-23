@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GetLeaderboardService implements GetLeaderboardUseCase {
 
-    private static final int TOP_RANKERS_LIMIT = 100;
+    private static final int TOP_RANKERS_LIMIT = 50;
 
     private final LoadLeaderboardPort loadLeaderboardPort;
     private final LoadUsersByIdsPort loadUsersByIdsPort;
