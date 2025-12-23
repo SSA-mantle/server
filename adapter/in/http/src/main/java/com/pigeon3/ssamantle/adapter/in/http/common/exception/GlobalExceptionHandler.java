@@ -3,6 +3,8 @@ package com.pigeon3.ssamantle.adapter.in.http.common.exception;
 import com.pigeon3.ssamantle.adapter.in.http.common.response.ApiResponse;
 import com.pigeon3.ssamantle.application.common.exception.ApplicationException;
 import com.pigeon3.ssamantle.application.common.exception.ExceptionType;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainException;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainExceptionType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;

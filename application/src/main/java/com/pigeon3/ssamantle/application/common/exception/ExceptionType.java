@@ -38,7 +38,8 @@ public enum ExceptionType {
     ALREADY_SOLVED("G003", 409, "이미 해결된 문제입니다."),
     ALREADY_GAVE_UP("G004", 409, "이미 포기한 문제입니다."),
     NO_GAME_IN_PROGRESS("G005", 404, "진행 중인 게임이 없습니다."),
-    SIMILARITY_CALCULATION_FAILED("G006", 500, "유사도 계산에 실패했습니다.");
+    SIMILARITY_CALCULATION_FAILED("G006", 500, "유사도 계산에 실패했습니다."),
+    WORD_NOT_FOUND("G007", 400, "없는 단어입니다.");
 
     private final String errorCode;
     private final int httpStatusCode;
