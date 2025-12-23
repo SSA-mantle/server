@@ -10,6 +10,8 @@ import com.pigeon3.ssamantle.application.leaderboard.port.out.SaveLeaderboardPor
 import com.pigeon3.ssamantle.application.user.port.out.LoadUserByIdPort;
 import com.pigeon3.ssamantle.application.user.port.out.UpdateUserPort;
 import com.pigeon3.ssamantle.domain.model.achievement.AchievementType;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainException;
+import com.pigeon3.ssamantle.domain.model.game.exception.GameDomainExceptionType;
 import com.pigeon3.ssamantle.domain.model.game.vo.WordSimilarity;
 import com.pigeon3.ssamantle.domain.model.leaderboard.vo.LeaderboardScore;
 import com.pigeon3.ssamantle.domain.model.problem.Problem;
@@ -154,14 +156,26 @@ public class SubmitGuessService implements SubmitGuessUseCase {
         // 1. 유사도 조회 (파이썬 서버가 저장한 Top 1000 -> 추론 서버)
         WordSimilarity wordSimilarity = loadWordFromTop1000Port.loadWord(today, command.guessWord())
             .orElseGet(() -> {
-                // Top 1000에 없으면 추론 서버에 요청
-                return calculateSimilarityPort.calculate(
-                    answer,
-                    command.guessWord()
-                );
+                // Top 1000에 없으면 추론 서버에 요청 (도메인 예외를 application 예외로 변환)
+                return calculateSimilarityFromInferenceServer(answer, command.guessWord());
             });
 
         // 2. 응답 반환 (failCount는 프론트엔드에서 관리)
         return SubmitGuessResponse.wrong(wordSimilarity, record.getFailCount());
+    }
+
+    /**
+     * 추론 서버에서 유사도 계산 (도메인 예외를 application 예외로 변환)
+     */
+    private WordSimilarity calculateSimilarityFromInferenceServer(String answer, String guessWord) {
+        try {
+            return calculateSimilarityPort.calculate(answer, guessWord);
+        } catch (GameDomainException e) {
+            if (e.getExceptionType() == GameDomainExceptionType.WORD_NOT_FOUND) {
+                throw ApplicationException.of(ExceptionType.WORD_NOT_FOUND, e.getMessage());
+            } else {
+                throw ApplicationException.of(ExceptionType.SIMILARITY_CALCULATION_FAILED, e.getMessage());
+            }
+        }
     }
 }
