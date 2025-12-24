@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "isCorrect": false,
+    "message": "오답입니다.",
+    "word": "바나나",
+    "similarity": 85.42,
+    "rank": 123,
+    "answer": null,
+    "failCount": 0
+  },
+  "error": null
+}

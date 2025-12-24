@@ -35,8 +35,5 @@ bin/
 ### VS Code ###
 .vscode/
 
-**/*.sql
-
 ### API Documentation ###
-api-docs/
 api-docs.zip

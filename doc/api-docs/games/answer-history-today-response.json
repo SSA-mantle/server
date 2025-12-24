@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "data": {
+    "date": "2025-12-22",
+    "answer": "사과",
+    "answerDescription": "정답단어는 빨간색 과일입니다.",
+    "top100Words": [
+      {
+        "word": "과일",
+        "similarity": 95.5,
+        "rank": 1
+      },
+      {
+        "word": "배",
+        "similarity": 92.3,
+        "rank": 2
+      },
+      {
+        "word": "바나나",
+        "similarity": 89.1,
+        "rank": 3
+      },
+      {
+        "word": "귤",
+        "similarity": 87.4,
+        "rank": 4
+      },
+      {
+        "word": "오렌지",
+        "similarity": 85.6,
+        "rank": 5
+      }
+    ]
+  },
+  "error": null
+}

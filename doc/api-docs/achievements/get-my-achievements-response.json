@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "userId": 1,
+    "achievements": [
+      {
+        "type": "STREAK_3_DAYS",
+        "title": "3일 연속 풀이",
+        "description": "3일 연속으로 문제를 해결했습니다",
+        "unlockedAt": "2025-12-20T14:30:25"
+      },
+      {
+        "type": "TOTAL_10_SOLVED",
+        "title": "문제 10개 해결",
+        "description": "총 10개의 문제를 해결했습니다",
+        "unlockedAt": "2025-12-22T09:15:10"
+      }
+    ]
+  },
+  "error": null
+}

@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "data": {
+    "isCorrect": true,
+    "message": "정답입니다!",
+    "word": "사과",
+    "similarity": null,
+    "rank": null,
+    "answer": "사과",
+    "failCount": 3,
+    "newAchievements": null
+  },
+  "error": null
+}

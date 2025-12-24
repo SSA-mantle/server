@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "data": {
+    "userId": 1,
+    "email": "user@example.com",
+    "nickname": "수정된닉네임",
+    "message": "유저 정보가 성공적으로 수정되었습니다."
+  },
+  "error": null
+}

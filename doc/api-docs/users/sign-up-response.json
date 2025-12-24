@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "data": {
+    "userId": 1,
+    "email": "newuser@example.com",
+    "nickname": "새로운사용자",
+    "role": "CUSTOMER"
+  },
+  "error": null
+}

@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "G003",
+    "message": "이미 해결된 문제입니다."
+  }
+}
