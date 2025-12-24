@@ -1,10 +1,9 @@
 # 싸멘틀(SSAmantle) 프로젝트 종합 문서
 
 ## 문서 정보
-- **프로젝트명**: 싸멘틀 (SSAmantle)
-- **버전**: 1.0
+- **프로젝트명**: 싸멘틀 (ssamantle)
 - **최종 수정일**: 2025-12-24
-- **작성자**: Development Team
+- **작성자**: 길태환
 
 ---
 
@@ -135,306 +134,34 @@
 ### 2.4 Use Case 다이어그램 (상세)
 
 #### 2.4.1 전체 시스템 Use Case
-```mermaid
-graph TB
-    subgraph "싸멘틀 시스템"
-        UC1[회원가입]
-        UC2[로그인]
-        UC3[토큰 갱신]
-        UC4[내 정보 조회]
-        UC5[사용자 정보 수정]
-        UC6[게임 통계 조회]
 
-        UC7[단어 추측 제출]
-        UC8[게임 포기]
-        UC9[게임 상태 조회]
-        UC10[오늘 정답 이력 조회]
-        UC11[어제 정답 이력 조회]
-
-        UC12[리더보드 조회]
-        UC13[내 업적 조회]
-        UC14[일일 배치 실행]
-    end
-
-    User([일반 사용자])
-    Admin([관리자])
-    System([스케줄러])
-
-    User --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC4
-    User --> UC5
-    User --> UC6
-    User --> UC7
-    User --> UC8
-    User --> UC9
-    User --> UC10
-    User --> UC11
-    User --> UC12
-    User --> UC13
-
-    Admin --> UC14
-    System -.-> UC14
-
-    UC7 -.includes.-> UC13
-
-    style User fill:#e1f5ff
-    style Admin fill:#ffe1e1
-    style System fill:#f0f0f0
-```
+![전체 시스템 Use Case](./1.png)
 
 #### 2.4.2 게임 플레이 Use Case (상세)
-```mermaid
-graph TB
-    User([사용자])
 
-    subgraph "게임 플레이"
-        UC1[단어 추측 제출]
-        UC2[게임 포기]
-        UC3[게임 상태 조회]
-        UC4[정답 이력 조회]
-    end
-
-    subgraph "결과 처리"
-        UC5[정답 판정]
-        UC6[유사도 계산]
-        UC7[기록 저장]
-        UC8[리더보드 업데이트]
-        UC9[업적 부여]
-    end
-
-    User --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC4
-
-    UC1 --> UC5
-    UC5 -->|정답| UC7
-    UC5 -->|정답| UC8
-    UC5 -->|정답| UC9
-    UC5 -->|오답| UC6
-    UC6 --> UC7
-    UC2 --> UC7
-
-    style User fill:#e1f5ff
-    style UC5 fill:#fff4e1
-    style UC8 fill:#e1ffe1
-    style UC9 fill:#ffe1f5
-```
+![게임 플레이 Use Case](./2.png)
 
 ### 2.5 주요 시퀀스 다이어그램
 
 #### 2.5.1 로그인 시퀀스
-```mermaid
-sequenceDiagram
-    actor User as 사용자
-    participant API as AuthController
-    participant UC as SignInUseCase
-    participant Service as SignInService
-    participant Port as LoadUserByEmailPort
-    participant Adapter as UserPersistenceAdapter
-    participant DB as MySQL
-    participant JWT as JwtProvider
 
-    User->>API: POST /api/v1/auth/sign-in<br/>{email, password}
-    API->>UC: signIn(command)
-    UC->>Service: execute(command)
-
-    Service->>Port: loadByEmail(email)
-    Port->>Adapter: loadByEmail(email)
-    Adapter->>DB: SELECT * FROM users WHERE email=?
-    DB-->>Adapter: UserEntity
-    Adapter-->>Port: User
-    Port-->>Service: User
-
-    Service->>Service: 비밀번호 검증
-
-    Service->>JWT: generateAccessToken(userId, email, role)
-    JWT-->>Service: accessToken
-
-    Service->>JWT: generateRefreshToken(userId)
-    JWT-->>Service: refreshToken
-
-    Service-->>UC: SignInResponse
-    UC-->>API: SignInResponse
-    API-->>User: 200 OK<br/>{userId, email, nickname, accessToken, refreshToken}
-```
+![로그인 시퀀스](./3.png)
 
 #### 2.5.2 단어 추측 제출 시퀀스 (정답인 경우)
-```mermaid
-sequenceDiagram
-    actor User as 사용자
-    participant API as GameController
-    participant UC as SubmitGuessUseCase
-    participant Service as SubmitGuessService
-    participant Redis as GameRedisAdapter
-    participant InferenceAPI as InferenceSimilarityAdapter
-    participant RecordPort as SaveRecordPort
-    participant UserPort as LoadUserPort
-    participant LeaderboardPort as SaveLeaderboardPort
-    participant AchievementUC as CheckAndGrantAchievementsUseCase
-    participant DB as MySQL
 
-    User->>API: POST /api/v1/games/guess<br/>{word: "사과", failCount: 3}
-    API->>UC: submitGuess(command)
-    UC->>Service: execute(command)
-
-    Service->>Redis: loadAnswerFromRedis(date)
-    Redis-->>Service: "사과"
-
-    Service->>Service: 정답 여부 판정<br/>("사과" == "사과")
-
-    alt 정답인 경우
-        Service->>RecordPort: save(record)<br/>failCount=3, solvedAt=now
-        RecordPort->>DB: UPDATE records SET fail_count=3, solved_at=now
-
-        Service->>UserPort: loadById(userId)
-        UserPort->>DB: SELECT * FROM users WHERE id=?
-        DB-->>UserPort: User
-        UserPort-->>Service: User
-
-        Service->>Service: user.solveProblem()<br/>todaySolve=true, nowCont++
-
-        Service->>UserPort: updateUser(user)
-        UserPort->>DB: UPDATE users SET today_solve=true, now_cont=nowCont+1
-
-        Service->>LeaderboardPort: save(userId, score)
-        LeaderboardPort->>Redis: ZADD ssamantle:leaderboard:2025-12-24<br/>userId score
-
-        Service->>AchievementUC: checkAndGrant(userId)
-        AchievementUC-->>Service: newAchievements[]
-    end
-
-    Service-->>UC: SubmitGuessResponse<br/>{isCorrect: true, answer: "사과", newAchievements}
-    UC-->>API: SubmitGuessResponse
-    API-->>User: 200 OK<br/>{isCorrect: true, answer: "사과", failCount: 3, newAchievements}
-```
+![단어 추측 제출 시퀀스 (정답)](./4.png)
 
 #### 2.5.3 단어 추측 제출 시퀀스 (오답인 경우)
-```mermaid
-sequenceDiagram
-    actor User as 사용자
-    participant API as GameController
-    participant Service as SubmitGuessService
-    participant Redis as GameRedisAdapter
-    participant InferenceAPI as InferenceSimilarityAdapter
-    participant RecordPort as SaveRecordPort
-    participant DB as MySQL
 
-    User->>API: POST /api/v1/games/guess<br/>{word: "바나나", failCount: 1}
-    API->>Service: execute(command)
-
-    Service->>Redis: loadAnswerFromRedis(date)
-    Redis-->>Service: "사과"
-
-    Service->>Service: 정답 여부 판정<br/>("바나나" != "사과")
-
-    alt 오답인 경우
-        Service->>Redis: loadWordFromTop1000("바나나", date)
-
-        alt Top 1000에 있는 경우
-            Redis-->>Service: WordSimilarity(85.42, 123)
-        else Top 1000에 없는 경우
-            Service->>InferenceAPI: calculateSimilarity("사과", "바나나")
-            InferenceAPI-->>Service: SimilarityResponse(0.8542, 123)
-            Service->>Service: convert to 0~100 scale
-        end
-
-        Service->>RecordPort: update(record)<br/>failCount++
-        RecordPort->>DB: UPDATE records SET fail_count=fail_count+1
-    end
-
-    Service-->>API: SubmitGuessResponse<br/>{isCorrect: false, similarity: 85.42, rank: 123}
-    API-->>User: 200 OK<br/>{isCorrect: false, word: "바나나", similarity: 85.42, rank: 123}
-```
+![단어 추측 제출 시퀀스 (오답)](./5.png)
 
 #### 2.5.4 리더보드 조회 시퀀스
-```mermaid
-sequenceDiagram
-    actor User as 사용자
-    participant API as LeaderboardController
-    participant Service as GetLeaderboardService
-    participant LeaderboardPort as LoadLeaderboardPort
-    participant Redis as LeaderboardRedisAdapter
-    participant UserPort as LoadUsersByIdsPort
-    participant DB as MySQL
 
-    User->>API: GET /api/v1/leaderboard?date=2025-12-24
-    API->>Service: execute(command)
-
-    Service->>LeaderboardPort: loadTopRankers(date, 50)
-    LeaderboardPort->>Redis: ZRANGE ssamantle:leaderboard:2025-12-24<br/>0 49 WITHSCORES
-    Redis-->>LeaderboardPort: [(userId1, score1), (userId2, score2), ...]
-    LeaderboardPort-->>Service: List<LeaderboardScore>
-
-    Service->>LeaderboardPort: loadMyRank(userId, date)
-    LeaderboardPort->>Redis: ZRANK ssamantle:leaderboard:2025-12-24 userId
-    Redis-->>LeaderboardPort: rank (or null)
-    LeaderboardPort->>Redis: ZSCORE ssamantle:leaderboard:2025-12-24 userId
-    Redis-->>LeaderboardPort: score
-    LeaderboardPort-->>Service: LeaderboardScore or null
-
-    Service->>Service: 사용자 ID 목록 추출<br/>[userId1, userId2, ..., myUserId]
-
-    Service->>UserPort: loadByIds([userId1, userId2, ...])
-    UserPort->>DB: SELECT * FROM users<br/>WHERE id IN (?, ?, ...)
-    DB-->>UserPort: List<User>
-    UserPort-->>Service: List<User>
-
-    Service->>Service: LeaderboardEntry 변환<br/>(rank, nickname, failCount, solvedAt)
-
-    Service-->>API: GetLeaderboardResponse<br/>{topRankers[], myRank}
-    API-->>User: 200 OK<br/>{date, topRankers[], myRank}
-```
+![리더보드 조회 시퀀스](./6.png)
 
 #### 2.5.5 일일 배치 작업 시퀀스
-```mermaid
-sequenceDiagram
-    actor Scheduler as 스케줄러
-    participant API as MaintenanceController
-    participant Service as RunDailyMaintenanceBatchService
-    participant MaintenancePort as MaintenanceRedisAdapter
-    participant LeaderboardPort as LoadLeaderboardPort
-    participant UserPort as LoadUserPort & UpdateUserPort
-    participant Redis as Redis
-    participant DB as MySQL
 
-    Scheduler->>API: POST /api/v1/maintenance/daily-batch<br/>(매일 00:00:00)
-    API->>Service: execute(command)
-
-    Service->>MaintenancePort: enableMaintenanceMode(60분)
-    MaintenancePort->>Redis: SET ssamantle:maintenance:enabled true EX 3600
-    Redis-->>MaintenancePort: OK
-
-    Service->>LeaderboardPort: loadTopRankers(yesterday, 50)
-    LeaderboardPort->>Redis: ZRANGE ssamantle:leaderboard:2025-12-23<br/>0 49
-    Redis-->>LeaderboardPort: [userId1, userId2, ...]
-    LeaderboardPort-->>Service: List<LeaderboardScore>
-
-    loop 상위 50명
-        Service->>UserPort: loadById(userId)
-        UserPort->>DB: SELECT * FROM users WHERE id=?
-        DB-->>UserPort: User
-        UserPort-->>Service: User
-
-        Service->>Service: user.updateBestRank(rank)
-
-        Service->>UserPort: updateUser(user)
-        UserPort->>DB: UPDATE users<br/>SET best_rank=? WHERE id=?
-    end
-
-    Service->>UserPort: resetTodaySolveForAllUsers()
-    UserPort->>DB: UPDATE users<br/>SET today_solve=false,<br/>now_cont=CASE WHEN today_solve THEN now_cont ELSE 0 END
-    DB-->>UserPort: affected rows
-
-    Service->>MaintenancePort: disableMaintenanceMode()
-    MaintenancePort->>Redis: DEL ssamantle:maintenance:enabled
-    Redis-->>MaintenancePort: OK
-
-    Service-->>API: BatchResponse<br/>{success: true, updatedUsers: 50}
-    API-->>Scheduler: 200 OK
-```
+![일일 배치 작업 시퀀스](./7.png)
 
 ---
 
@@ -624,68 +351,20 @@ bootstrap → adapter → application → domain
 - 9.3 운영 가이드 작성
 
 ### 5.2 간트 차트
+![간트차트](./8.png)
 
-```mermaid
-gantt
-    title 싸멘틀 프로젝트 일정
-    dateFormat  YYYY-MM-DD
-
-    section 계획
-    요구사항 분석           :a1, 2025-01-01, 3d
-    기술 스택 선정          :a2, after a1, 2d
-    아키텍처 설계           :a3, after a2, 2d
-
-    section 환경 구축
-    멀티모듈 설정           :b1, 2025-01-08, 2d
-    Spring Boot 설정        :b2, after b1, 2d
-    DB/Redis 연동           :b3, after b2, 2d
-    CI/CD 구축             :b4, after b3, 1d
-
-    section 도메인 개발
-    User 도메인             :c1, 2025-01-15, 2d
-    Problem/Record 도메인   :c2, after c1, 2d
-    Achievement 도메인      :c3, after c2, 2d
-    값 객체                :c4, after c3, 1d
-
-    section 애플리케이션
-    사용자 관리            :d1, 2025-01-22, 4d
-    게임 플레이            :d2, after d1, 4d
-    리더보드/업적          :d3, after d2, 3d
-    일일 배치              :d4, after d3, 2d
-
-    section 어댑터
-    HTTP Adapter           :e1, 2025-02-05, 4d
-    RDB Adapter            :e2, after e1, 4d
-    Redis Adapter          :e3, after e2, 3d
-    External Adapter       :e4, after e3, 2d
-
-    section 추론 서버
-    모델 학습              :f1, 2025-02-19, 3d
-    API 구현               :f2, after f1, 2d
-    Redis 연동             :f3, after f2, 2d
-
-    section 테스트
-    단위 테스트            :g1, 2025-02-26, 3d
-    통합 테스트            :g2, after g1, 2d
-    부하 테스트            :g3, after g2, 2d
-
-    section 배포
-    환경 구축              :h1, 2025-03-05, 2d
-    모니터링 설정          :h2, after h1, 2d
-    운영 준비              :h3, after h2, 2d
-```
 
 ### 5.3 주요 마일스톤
 
 | 마일스톤 | 날짜 | 산출물 |
 |---------|------|--------|
-| **M1: 설계 완료** | 2025-01-14 | 요구사항 명세서, 아키텍처 설계서, ERD |
-| **M2: 도메인 개발 완료** | 2025-01-21 | 도메인 모델, 도메인 서비스 |
-| **M3: 애플리케이션 개발 완료** | 2025-02-04 | UseCase, Service, Port 인터페이스 |
-| **M4: 어댑터 개발 완료** | 2025-02-18 | Controller, Persistence Adapter, Redis Adapter |
-| **M5: 추론 서버 완료** | 2025-02-25 | Word2Vec 모델, 유사도 API |
-| **M6: 테스트 완료** | 2025-03-04 | 테스트 리포트, 커버리지 보고서 |
-| **M7: 배포 완료** | 2025-03-10 | 프로덕션 환경, 모니터링 대시보드 |
+| **M1: 설계 완료** | 2025-11-27 | 요구사항 명세서, 아키텍처 설계서, ERD |
+| **M2: 환경 구축 완료** | 2025-12-01 | 멀티모듈 설정, Spring Boot 설정, DB/Redis 연동 |
+| **M3: 도메인 개발 완료** | 2025-12-05 | 도메인 모델, 도메인 서비스 |
+| **M4: 애플리케이션 개발 완료** | 2025-12-12 | UseCase, Service, Port 인터페이스 |
+| **M5: 어댑터 개발 완료** | 2025-12-18 | Controller, Persistence Adapter, Redis Adapter |
+| **M6: 추론 서버 완료** | 2025-12-21 | Word2Vec 모델, 유사도 API |
+| **M7: 테스트 및 배포 완료** | 2025-12-24 | 테스트 리포트, 프로덕션 환경 |
 
 ---
 
@@ -804,80 +483,101 @@ include 'bootstrap'
 ---
 
 ## 7. 화면 설계서
+### 1. 초기 화면(Welcome)
 
-### 7.1 개요
-*(화면 설계는 프론트엔드 팀과 협의 후 작성 예정)*
+#### 1.1. 로그인 화면
 
-### 7.2 주요 화면 목록
+![image.png](image.png)
 
-#### 7.2.1 인증 화면
-- [ ] 로그인 화면
-- [ ] 회원가입 화면
+#### 1.2. 회원가입 화면
 
-#### 7.2.2 게임 화면
-- [ ] 메인 게임 화면
-- [ ] 게임 결과 화면 (정답 시)
-- [ ] 게임 결과 화면 (포기 시)
+##### 1.2.1. 회원가입 성공
 
-#### 7.2.3 정보 화면
-- [ ] About 페이지 (게임 방법 설명)
-- [ ] FAQ 페이지
-
-#### 7.2.4 사용자 화면
-- [ ] 마이페이지
-- [ ] 게임 통계 화면
-- [ ] 업적 화면
-- [ ] 정보 수정 화면
-
-#### 7.2.5 리더보드 화면
-- [ ] 일일 리더보드
-- [ ] 과거 리더보드 (날짜 선택)
-
-#### 7.2.6 정답 이력 화면
-- [ ] 오늘 정답 이력
-- [ ] 어제 정답 이력
-
-### 7.3 화면 흐름도
-*(추후 작성)*
-
-### 7.4 와이어프레임
-*(추후 작성)*
-
-### 7.5 스타일 가이드
-*(추후 작성)*
+![image.png](image%201.png)
 
 ---
 
-## 부록
+### 2. 메인 게임 화면(main)
 
-### A. 참고 문서
-- [API 문서](./api-docs/README.md)
-- [아키텍처 가이드](../CLAUDE.md)
-- [요구사항 정의서](./REQUIREMENTS.md)
-- [클래스 다이어그램](./CLASS_DIAGRAM.md)
+#### 2.1. Intro
 
-### B. 용어 정리
+- 로그인 후  첫 진입 시 나타나는 화면
 
-| 용어 | 설명 |
-|------|------|
-| **싸멘틀** | SSAFY + Semantle의 합성어 |
-| **Semantle** | 단어의 의미 유사도 기반 추론 게임 |
-| **스트릭 (Streak)** | 연속 풀이 일수 |
-| **Top 1000** | 정답과 가장 유사한 상위 1000개 단어 |
-| **리더보드** | 일일 순위표 |
-| **업적** | 특정 조건 달성 시 부여되는 성취 |
-| **failCount** | 오답 시도 횟수 |
-| **todaySolve** | 오늘 문제를 풀었는지 여부 |
-| **nowCont** | 현재 연속 풀이 일수 |
-| **longestCont** | 최장 연속 풀이 일수 |
-| **bestRank** | 최고 순위 |
+![image.png](image%202.png)
 
-### C. 변경 이력
+#### 2.2. 화면 구성
 
-| 버전 | 날짜 | 작성자 | 변경 내용 |
-|------|------|--------|---------|
-| 1.0 | 2025-12-24 | Development Team | 초안 작성 |
+##### 2.2.1. Header
 
+![image.png](image%203.png)
+
+##### 2.2.2. Footer
+
+![image.png](image%204.png)
+
+##### 2.2.3 메인 화면
+
+![image.png](image%205.png)
+
+#### 2.3. 메인 게임 플로우
+
+##### 2.3.1. 오답 시
+
+![image.png](image%206.png)
+
+##### 2.3.2. 정답 시
+
+![image.png](image%207.png)
+
+##### 2.3.3. 게임 포기 시
+
+- 추측 단어가 1개 이상이어야 포기 가능
+
+![image.png](image%208.png)
+
+![image.png](image%209.png)
+
+![image.png](image%2010.png)
+
+---
+
+# 3. 메인 페이지 Header Navigation
+
+## 3.1. About 페이지
+
+![image.png](image%2011.png)
+
+## 3.2. Leaderboard 페이지
+
+![image.png](image%2012.png)
+
+## 3.3. History 페이지
+
+![image.png](image%2013.png)
+
+## 3.4. FAQ 페이지
+
+![image.png](image%2014.png)
+
+## 3.5. 마이페이지
+
+![image.png](image%2015.png)
+
+### 3.5.1. 마이페이지 > 정보 수정 페이지
+
+![image.png](image%2016.png)
+
+![image.png](image%2017.png)
+
+![image.png](image%2018.png)
+
+![image.png](image%2019.png)
+
+![image.png](image%2020.png)
+
+## 3.6. 로그아웃
+
+![image.png](image%2021.png)
 ---
 
 **END OF DOCUMENT**
