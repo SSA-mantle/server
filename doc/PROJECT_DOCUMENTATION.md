@@ -97,7 +97,7 @@
 
 싸멘틀 시스템의 전체 Use Case는 다음과 같습니다:
 
-![UseCase 다이어그램](./UseCase.png)
+![UseCase 다이어그램](./image/UseCase.png)
 
 ### 2.2 주요 액터
 
@@ -135,33 +135,33 @@
 
 #### 2.4.1 전체 시스템 Use Case
 
-![전체 시스템 Use Case](./1.png)
+![전체 시스템 Use Case](./image/1.png)
 
 #### 2.4.2 게임 플레이 Use Case (상세)
 
-![게임 플레이 Use Case](./2.png)
+![게임 플레이 Use Case](./image/2.png)
 
 ### 2.5 주요 시퀀스 다이어그램
 
 #### 2.5.1 로그인 시퀀스
 
-![로그인 시퀀스](./3.png)
+![로그인 시퀀스](./image/3.png)
 
 #### 2.5.2 단어 추측 제출 시퀀스 (정답인 경우)
 
-![단어 추측 제출 시퀀스 (정답)](./4.png)
+![단어 추측 제출 시퀀스 (정답)](./image/4.png)
 
 #### 2.5.3 단어 추측 제출 시퀀스 (오답인 경우)
 
-![단어 추측 제출 시퀀스 (오답)](./5.png)
+![단어 추측 제출 시퀀스 (오답)](./image/5.png)
 
 #### 2.5.4 리더보드 조회 시퀀스
 
-![리더보드 조회 시퀀스](./6.png)
+![리더보드 조회 시퀀스](./image/6.png)
 
 #### 2.5.5 일일 배치 작업 시퀀스
 
-![일일 배치 작업 시퀀스](./7.png)
+![일일 배치 작업 시퀀스](./image/7.png)
 
 ---
 
@@ -175,7 +175,7 @@
 ### 3.2 클래스 다이어그램 이미지
 
 #### 3.2.1 도메인 및 애플리케이션 계층
-![클래스 다이어그램 1](./class1_Back.png)
+![클래스 다이어그램 1](./image/class1_Back.png)
 
 ### 3.3 주요 계층 및 패턴
 
@@ -209,7 +209,7 @@ bootstrap → adapter → application → domain
 
 싸멘틀의 데이터베이스 ERD는 다음과 같습니다:
 
-![ERD](./ERD.png)
+![ERD](./image/ERD.png)
 
 ### 4.2 주요 테이블
 
@@ -351,7 +351,7 @@ bootstrap → adapter → application → domain
 - 9.3 운영 가이드 작성
 
 ### 5.2 간트 차트
-![간트차트](./8.png)
+![간트차트](./image/8.png)
 
 
 ### 5.3 주요 마일스톤
@@ -374,7 +374,7 @@ bootstrap → adapter → application → domain
 
 싸멘틀은 헥사고날 아키텍처를 기반으로 한 멀티모듈 프로젝트입니다.
 
-![모듈 구조](./module.png)
+![모듈 구조](./image/module.png)
 
 ### 6.2 모듈별 설명
 
@@ -487,13 +487,13 @@ include 'bootstrap'
 
 #### 1.1. 로그인 화면
 
-![image.png](image.png)
+![image.png](image/image.png)
 
 #### 1.2. 회원가입 화면
 
 ##### 1.2.1. 회원가입 성공
 
-![image.png](image%201.png)
+![image.png](image/image%201.png)
 
 ---
 
@@ -503,41 +503,41 @@ include 'bootstrap'
 
 - 로그인 후  첫 진입 시 나타나는 화면
 
-![image.png](image%202.png)
+![image.png](image/image%202.png)
 
 #### 2.2. 화면 구성
 
 ##### 2.2.1. Header
 
-![image.png](image%203.png)
+![image.png](image/image%203.png)
 
 ##### 2.2.2. Footer
 
-![image.png](image%204.png)
+![image.png](image/image%204.png)
 
 ##### 2.2.3 메인 화면
 
-![image.png](image%205.png)
+![image.png](image/image%205.png)
 
 #### 2.3. 메인 게임 플로우
 
 ##### 2.3.1. 오답 시
 
-![image.png](image%206.png)
+![image.png](image/image%206.png)
 
 ##### 2.3.2. 정답 시
 
-![image.png](image%207.png)
+![image.png](image/image%207.png)
 
 ##### 2.3.3. 게임 포기 시
 
 - 추측 단어가 1개 이상이어야 포기 가능
 
-![image.png](image%208.png)
+![image.png](image/image%208.png)
 
-![image.png](image%209.png)
+![image.png](image/image%209.png)
 
-![image.png](image%2010.png)
+![image.png](image/image%2010.png)
 
 ---
 
@@ -545,39 +545,39 @@ include 'bootstrap'
 
 ## 3.1. About 페이지
 
-![image.png](image%2011.png)
+![image.png](image/image%2011.png)
 
 ## 3.2. Leaderboard 페이지
 
-![image.png](image%2012.png)
+![image.png](image/image%2012.png)
 
 ## 3.3. History 페이지
 
-![image.png](image%2013.png)
+![image.png](image/image%2013.png)
 
 ## 3.4. FAQ 페이지
 
-![image.png](image%2014.png)
+![image.png](image/image%2014.png)
 
 ## 3.5. 마이페이지
 
-![image.png](image%2015.png)
+![image.png](image/image%2015.png)
 
 ### 3.5.1. 마이페이지 > 정보 수정 페이지
 
-![image.png](image%2016.png)
+![image.png](image/image%2016.png)
 
-![image.png](image%2017.png)
+![image.png](image/image%2017.png)
 
-![image.png](image%2018.png)
+![image.png](image/image%2018.png)
 
-![image.png](image%2019.png)
+![image.png](image/image%2019.png)
 
-![image.png](image%2020.png)
+![image.png](image/image%2020.png)
 
 ## 3.6. 로그아웃
 
-![image.png](image%2021.png)
+![image.png](image/image%2021.png)
 ---
 
 **END OF DOCUMENT**
