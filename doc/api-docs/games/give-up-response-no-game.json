@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "G005",
+    "message": "진행 중인 게임이 없습니다."
+  }
+}

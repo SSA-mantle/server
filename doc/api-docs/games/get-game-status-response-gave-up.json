@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "data": {
+    "status": "GAVE_UP",
+    "failCount": 12
+  },
+  "error": null
+}

@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "userId": 1,
+    "totalGamesPlayed": 50,
+    "successfulGames": 35,
+    "winRate": 70.0,
+    "bestRank": 3,
+    "longestConsecutiveDays": 15,
+    "averageAttempts": 4.2
+  },
+  "error": null
+}

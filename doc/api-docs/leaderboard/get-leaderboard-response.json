@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "data": {
+    "date": "2025-12-22",
+    "topRankers": [
+      {
+        "rank": 1,
+        "nickname": "유저1",
+        "failCount": 2,
+        "solvedAt": "2025-12-22T08:15:30"
+      },
+      {
+        "rank": 2,
+        "nickname": "유저2",
+        "failCount": 3,
+        "solvedAt": "2025-12-22T09:20:15"
+      },
+      {
+        "rank": 3,
+        "nickname": "유저3",
+        "failCount": 3,
+        "solvedAt": "2025-12-22T10:05:42"
+      }
+    ],
+    "myRank": {
+      "rank": 15,
+      "nickname": "내닉네임",
+      "failCount": 5,
+      "solvedAt": "2025-12-22T14:30:25"
+    }
+  },
+  "error": null
+}

@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "data": {
+    "message": "포기하셨습니다. 정답은 '사과' 입니다.",
+    "answer": "사과",
+    "failCount": 5,
+    "giveUpAt": "2025-12-15T14:30:25.123456"
+  },
+  "error": null
+}
